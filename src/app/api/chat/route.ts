@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-const client = new OpenAI({
-  apiKey: process.env.DEEPSEEK_API_KEY,
-  baseURL: process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com',
-});
+export const dynamic = 'force-dynamic';
+
+function getClient() {
+  return new OpenAI({
+    apiKey: process.env.DEEPSEEK_API_KEY || '',
+    baseURL: process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com',
+  });
+}
 
 const SYSTEM_PROMPT = `你是 Travel Copilot，一个松弛型旅行搭子。你的人格特点：
 - 不说教，不催促，像一个去过很多地方的朋友
@@ -85,7 +89,7 @@ export async function POST(request: NextRequest) {
       ];
     }
 
-    const completion = await client.chat.completions.create({
+    const completion = await getClient().chat.completions.create({
       model: 'deepseek-chat',
       messages: [...systemMessages, ...messages],
       temperature: action === 'generate' ? 0.3 : 0.8,
