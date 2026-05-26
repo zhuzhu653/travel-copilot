@@ -432,7 +432,7 @@ function SpotCardComponent({ spot, isFlipped, onFlip, index, isRevealed, onRevea
             <Gift size={24} className="text-[#0c8ce9]" />
           </motion.div>
           <h3 className="font-semibold text-slate-900 text-sm mb-1">Lucky Spot 盲盒</h3>
-          <p className="text-xs text-slate-400">点击揭晓 AI 为你挑选的惊喜地点</p>
+          <p className="text-xs text-slate-400">点击揭晓 Travel Copilot 为你挑选的惊喜地点</p>
           <div className="flex justify-center gap-1 mt-3">
             {[...Array(3)].map((_, i) => (
               <motion.span
