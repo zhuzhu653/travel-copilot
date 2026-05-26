@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, SlidersHorizontal, Lightbulb, Sparkles, Compass } from 'lucide-react';
+import { Send, SlidersHorizontal, Lightbulb, Sparkles, Compass, User, Bot } from 'lucide-react';
 import { PreferenceSliders } from './PreferenceSliders';
 import type { UserPreferences, Itinerary } from '@/app/page';
 
@@ -125,10 +125,17 @@ export function ChatInterface({
       if (data.content) {
         const jsonMatch = data.content.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
-          const itinerary = JSON.parse(jsonMatch[0]) as Itinerary;
-          onItineraryGenerated(itinerary);
+          try {
+            const itinerary = JSON.parse(jsonMatch[0]) as Itinerary;
+            onItineraryGenerated(itinerary);
+            return;
+          } catch {
+            // JSON parse failed, fall through to mock
+          }
         }
       }
+      // If we get here, API didn't return valid itinerary JSON
+      onItineraryGenerated(getMockItinerary());
     } catch (e) {
       console.error('Generate error:', e);
       onItineraryGenerated(getMockItinerary());
@@ -201,13 +208,23 @@ export function ChatInterface({
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25 }}
-              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`flex items-start gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
             >
+              {/* Avatar */}
+              <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center shadow-sm ${msg.role === 'user' ? 'bg-blue-600' : 'bg-white border border-blue-100'}`}>
+                {msg.role === 'user' ? (
+                  <User className="w-4 h-4 text-white" />
+                ) : (
+                  <Bot className="w-4 h-4 text-blue-600" />
+                )}
+              </div>
+              
+              {/* Bubble */}
               <div
                 className={`max-w-[80%] sm:max-w-[72%] rounded-2xl px-4 py-3 ${
                   msg.role === 'user'
-                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-md shadow-sm shadow-blue-200'
-                    : 'bg-white border border-blue-100/60 shadow-sm rounded-bl-md'
+                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-tr-sm shadow-sm shadow-blue-200'
+                    : 'bg-white border border-blue-100/60 shadow-sm rounded-tl-sm text-slate-700'
                 }`}
               >
                 <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
@@ -217,12 +234,15 @@ export function ChatInterface({
         </AnimatePresence>
 
         {isLoading && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
-            <div className="bg-white border border-blue-100/60 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
-              <div className="flex gap-1">
-                <span className="w-1.5 h-1.5 bg-blue-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="w-1.5 h-1.5 bg-blue-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-1.5 h-1.5 bg-blue-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-start gap-3 flex-row">
+            <div className="w-8 h-8 shrink-0 rounded-full flex items-center justify-center shadow-sm bg-white border border-blue-100">
+              <Bot className="w-4 h-4 text-blue-600" />
+            </div>
+            <div className="bg-white border border-blue-100/60 rounded-2xl rounded-tl-sm px-4 py-4 shadow-sm">
+              <div className="flex gap-1.5">
+                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
               </div>
             </div>
           </motion.div>

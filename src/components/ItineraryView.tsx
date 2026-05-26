@@ -22,6 +22,8 @@ import {
   LayoutGrid,
   AlignJustify,
   Activity,
+  Bot,
+  ChevronRight,
 } from 'lucide-react';
 import type { Itinerary, SpotCard, UserPreferences } from '@/app/page';
 
@@ -33,10 +35,10 @@ interface ItineraryViewProps {
 }
 
 const versions = [
-  { id: 'classic', label: '经典版', desc: '平衡体验', icon: MapPin },
+  { id: 'classic', label: '保留原计划', desc: '', icon: MapPin },
   { id: 'relax', label: '轻松版', desc: '减少步行', icon: Coffee },
   { id: 'rainy', label: '雨天版', desc: '室内优先', icon: Eye },
-  { id: 'photo', label: '拍照版', desc: '出片为主', icon: Camera },
+  { id: 'photo', label: '拍照优先版', desc: '出片为主', icon: Camera },
 ];
 
 export function ItineraryView({ itinerary, preferences, onBack, onVersionSwitch }: ItineraryViewProps) {
@@ -141,28 +143,27 @@ export function ItineraryView({ itinerary, preferences, onBack, onVersionSwitch 
             exit={{ opacity: 0, y: -10 }}
             className="max-w-3xl mx-auto px-4 sm:px-6 mt-4"
           >
-            <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-xs">
-              <div className="flex items-start justify-between">
-                <div className="flex gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-[#0c8ce9]/10 flex items-center justify-center shrink-0">
-                    <Zap size={16} className="text-[#0c8ce9]" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-slate-900 mb-1">动态调整建议</p>
-                    <p className="text-xs text-slate-500 leading-relaxed">
-                      下午2点气温较高（预计34°C），当前路线连续室外步行2.8小时。建议插入45分钟室内休息点，并减少1个低优先级点位。
-                    </p>
-                  </div>
+            <div className="bg-white rounded-2xl p-5 border border-blue-100/60 shadow-sm relative">
+              <button
+                onClick={() => setShowAlert(false)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <X size={16} />
+              </button>
+
+              <div className="flex gap-3 mb-4">
+                <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
+                  <Bot size={16} className="text-blue-600" />
                 </div>
-                <button
-                  onClick={() => setShowAlert(false)}
-                  className="text-slate-300 hover:text-slate-500 ml-2 transition-colors"
-                >
-                  <X size={16} />
-                </button>
+                <div>
+                  <p className="text-sm text-slate-700 leading-relaxed font-medium mt-1">
+                    下午 2 点气温较高，当前路线连续室外步行 2.8 小时，建议插入 45 分钟室内休息点，并减少 1 个低优先级点位。
+                  </p>
+                </div>
               </div>
 
-              <div className="flex gap-2 mt-3 pl-11 flex-wrap">
+              <div className="pl-11 space-y-2">
+                <p className="text-xs text-slate-400 font-medium mb-2">用户可选择：</p>
                 {versions.map((v) => {
                   const Icon = v.icon;
                   return (
@@ -173,14 +174,15 @@ export function ItineraryView({ itinerary, preferences, onBack, onVersionSwitch 
                         onVersionSwitch(v.label);
                         setShowAlert(false);
                       }}
-                      className={`text-xs px-3 py-1.5 rounded-lg transition-all font-medium flex items-center gap-1.5 ${
-                        activeVersion === v.id
-                          ? 'bg-slate-950 text-white'
-                          : 'bg-slate-50 border border-slate-100 text-slate-600 hover:border-slate-200'
-                      }`}
+                      className="w-full text-left px-4 py-3 rounded-xl bg-slate-50 hover:bg-blue-50 border border-slate-100 hover:border-blue-100 transition-all flex items-center justify-between group"
                     >
-                      <Icon size={12} />
-                      {v.label}
+                      <div className="flex items-center gap-2">
+                        <Icon size={16} className={activeVersion === v.id ? 'text-blue-600' : 'text-slate-500 group-hover:text-blue-600'} />
+                        <span className={`text-sm font-medium ${activeVersion === v.id ? 'text-blue-700' : 'text-slate-700 group-hover:text-blue-700'}`}>
+                          {v.label} {v.desc && <span className="text-xs font-normal text-slate-500">({v.desc})</span>}
+                        </span>
+                      </div>
+                      <ChevronRight size={14} className="text-slate-300 group-hover:text-blue-400" />
                     </button>
                   );
                 })}
@@ -373,75 +375,76 @@ function SpotCardComponent({ spot, isFlipped, onFlip, index, isRevealed, onRevea
 
   return (
     <motion.div
-      whileHover={{ y: -1 }}
-      onClick={onFlip}
-      className="cursor-pointer"
+      whileHover={{ y: -2 }}
+      className="bg-white rounded-2xl p-4 sm:p-5 border border-blue-100/60 shadow-sm mb-3"
     >
-      <div className="card-flip">
-        <div className={`card-flip-inner ${isFlipped ? 'flipped' : ''} relative`}>
-          {/* Front */}
-          <div className={`card-front bg-white rounded-xl p-4 sm:p-5 border shadow-xs ${
-            spot.isLuckySpot ? 'border-[#0c8ce9]/15' : 'border-slate-100'
-          }`}>
-            <div className="flex items-start justify-between">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1.5">
-                  {spot.isLuckySpot && <Gift size={14} className="text-[#0c8ce9]" />}
-                  <h3 className="font-medium text-slate-900 text-sm sm:text-base">{spot.name}</h3>
-                </div>
-                <p className="text-xs sm:text-sm text-slate-500 mb-3 leading-relaxed">{spot.description}</p>
+      <div className="mb-4">
+        <div className="flex items-center gap-2 mb-1.5">
+          {spot.isLuckySpot && <Gift size={16} className="text-blue-500" />}
+          <h3 className="font-semibold text-slate-800 text-lg">{spot.name}</h3>
+        </div>
+        <p className="text-sm text-slate-600 leading-relaxed">{spot.description}</p>
+      </div>
 
-                <div className="flex gap-1.5 flex-wrap">
-                  <span className={`text-[10px] sm:text-xs px-2 py-0.5 rounded-md font-medium flex items-center gap-1 ${getCrowdColor(spot.crowdLevel)}`}>
-                    <Users size={10} />
-                    {getCrowdLabel(spot.crowdLevel)}
-                  </span>
-                  <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded-md bg-slate-50 text-slate-600 font-medium flex items-center gap-1">
-                    <Camera size={10} />
-                    {spot.photoScore}/5
-                  </span>
-                  {spot.walkingMinutes > 0 && (
-                    <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded-md bg-slate-50 text-slate-600 font-medium flex items-center gap-1">
-                      <Footprints size={10} />
-                      {spot.walkingMinutes}min
-                    </span>
-                  )}
-                </div>
-              </div>
-              <span className="text-[10px] sm:text-xs text-slate-300 shrink-0">详情</span>
-            </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+        {/* Recommendation Reason */}
+        <div className="bg-blue-50/50 rounded-xl p-3 border border-blue-50">
+          <div className="flex items-center gap-1.5 mb-1 text-blue-700">
+            <Star size={14} className="fill-current" />
+            <span className="text-xs font-semibold">推荐理由</span>
           </div>
+          <div className="flex gap-0.5 mb-1.5 text-yellow-400">
+             {'★'.repeat(5)}
+          </div>
+          <p className="text-xs text-slate-600 font-medium leading-relaxed">{spot.reason}</p>
+        </div>
 
-          {/* Back */}
-          <div className={`card-back absolute inset-0 bg-white rounded-xl p-4 sm:p-5 border shadow-xs ${
-            spot.isLuckySpot ? 'border-[#0c8ce9]/15' : 'border-slate-100'
-          }`}>
-            <div className="flex items-center gap-1.5 mb-2">
-              <Star size={14} className="text-slate-900" />
-              <h4 className="text-sm font-medium text-slate-900">推荐理由</h4>
-            </div>
-            <p className="text-xs sm:text-sm text-slate-600 mb-3 leading-relaxed">{spot.reason}</p>
+        {/* Crowd Risk */}
+        <div className="bg-blue-50/50 rounded-xl p-3 border border-blue-50">
+          <div className="flex items-center gap-1.5 mb-1 text-blue-700">
+            <Users size={14} />
+            <span className="text-xs font-semibold">人流风险</span>
+          </div>
+          <p className={`text-xs font-bold mb-1.5 ${getCrowdColor(spot.crowdLevel).replace('bg-', 'bg-opacity-0 text-')}`}>{getCrowdLabel(spot.crowdLevel)}</p>
+          <p className="text-xs text-slate-600 font-medium leading-relaxed">节假日人流预测较低</p>
+        </div>
 
-            <div className="space-y-1.5 text-xs text-slate-500">
-              <p className="flex items-center gap-1.5">
-                <Clock size={12} className="text-slate-400" />
-                最佳时段：{spot.bestTime}
-              </p>
-              {spot.alternatives.length > 0 && (
-                <p className="flex items-center gap-1.5">
-                  <Shuffle size={12} className="text-slate-400" />
-                  备选方案：{spot.alternatives.join(' / ')}
-                </p>
-              )}
-              <p className="flex items-center gap-1.5">
-                <MapPin size={12} className="text-slate-400" />
-                类型：{spot.category}
-              </p>
-            </div>
+        {/* Photo Suitability */}
+        <div className="bg-blue-50/50 rounded-xl p-3 border border-blue-50">
+          <div className="flex items-center gap-1.5 mb-1 text-blue-700">
+            <Camera size={14} />
+            <span className="text-xs font-semibold">拍照适配度</span>
+          </div>
+          <div className="flex gap-0.5 mb-1.5 text-yellow-400">
+             {'★'.repeat(Math.round(spot.photoScore))}{'☆'.repeat(5 - Math.round(spot.photoScore))}
+          </div>
+          <p className="text-xs text-slate-600 font-medium leading-relaxed">自然光线出片率高</p>
+        </div>
+      </div>
 
-            <p className="text-[10px] sm:text-xs text-slate-300 mt-3">点击翻回</p>
+      {/* Bottom info */}
+      <div className="flex flex-wrap gap-4 text-xs">
+        <div className="flex items-center gap-1.5 text-slate-600">
+          <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+            <Footprints size={12} />
+          </div>
+          <div>
+            <span className="font-semibold block text-slate-700">步行强度</span>
+            <span className="text-slate-500">单日步行约 {spot.walkingMinutes} 分钟</span>
           </div>
         </div>
+
+        {spot.alternatives.length > 0 && (
+          <div className="flex items-center gap-1.5 text-slate-600">
+            <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+              <MapPin size={12} />
+            </div>
+            <div>
+              <span className="font-semibold block text-slate-700">可替代地点</span>
+              <span className="text-slate-500">下雨/人多时可备选 {spot.alternatives.length} 处</span>
+            </div>
+          </div>
+        )}
       </div>
     </motion.div>
   );

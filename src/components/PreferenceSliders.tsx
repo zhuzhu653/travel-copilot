@@ -45,9 +45,11 @@ export function PreferenceSliders({ weights, onChange }: PreferenceSlidersProps)
           const normalized = getNormalized(slider.key);
           return (
             <div key={slider.key} className="flex items-center gap-3">
-              <div className="flex items-center gap-2 w-16 shrink-0">
-                <Icon className="w-3.5 h-3.5 text-slate-400" strokeWidth={1.5} />
-                <span className="text-xs text-slate-600">{slider.label}</span>
+              <div className="flex items-center gap-2 w-20 shrink-0">
+                <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center">
+                  <Icon className="w-3.5 h-3.5 text-blue-600" strokeWidth={1.5} />
+                </div>
+                <span className="text-xs text-slate-700 font-medium">{slider.label}</span>
               </div>
               <input
                 type="range"
@@ -58,14 +60,16 @@ export function PreferenceSliders({ weights, onChange }: PreferenceSlidersProps)
                 onChange={(e) =>
                   onChange({ ...weights, [slider.key]: parseInt(e.target.value) })
                 }
-                className="flex-1 cursor-pointer"
+                className="flex-1 cursor-pointer appearance-none h-1.5 rounded-full"
                 style={{
-                  background: `linear-gradient(to right, #4a9ff5 ${weights[slider.key]}%, #e0effe ${weights[slider.key]}%)`,
+                  background: `linear-gradient(to right, #3B82F6 ${weights[slider.key]}%, #dbeafe ${weights[slider.key]}%)`,
                 }}
               />
-              <span className="text-2xs font-mono text-slate-500 w-8 text-right">
-                {normalized}%
-              </span>
+              <div className="w-10 text-right">
+                <span className="text-xs font-mono font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">
+                  {normalized}%
+                </span>
+              </div>
             </div>
           );
         })}
