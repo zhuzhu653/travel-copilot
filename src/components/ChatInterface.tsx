@@ -173,6 +173,37 @@ export function ChatInterface({
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4">
+        {/* Quick start examples - shown when only welcome message exists */}
+        {chatHistory.length <= 1 && !isLoading && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="space-y-3"
+          >
+            <p className="text-xs text-primary-500 font-medium text-center">👇 不知道说什么？试试点击下面的例子：</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {[
+                { emoji: '🌸', text: '端午想去杭州玩两天，松弛一点的那种' },
+                { emoji: '🏙️', text: '周末上海citywalk，喜欢拍照和咖啡' },
+                { emoji: '🌊', text: '想找个海边小城发呆三天，预算2000以内' },
+                { emoji: '🎌', text: '第一次去日本，5天自由行求攻略' },
+              ].map((example, i) => (
+                <motion.button
+                  key={i}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => sendMessage(example.text)}
+                  className="text-left p-3 rounded-xl bg-white/60 hover:bg-white/90 border border-primary-100/50 hover:border-primary-200 transition-all group"
+                >
+                  <span className="text-lg mr-2">{example.emoji}</span>
+                  <span className="text-xs sm:text-sm text-navy-800 group-hover:text-primary-700">{example.text}</span>
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
         <AnimatePresence>
           {chatHistory.map((msg, i) => (
             <motion.div

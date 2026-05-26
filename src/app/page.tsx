@@ -6,6 +6,7 @@ import { WelcomeScreen } from '@/components/WelcomeScreen';
 import { PersonalityTest } from '@/components/PersonalityTest';
 import { ChatInterface } from '@/components/ChatInterface';
 import { ItineraryView } from '@/components/ItineraryView';
+import { FloatingPet } from '@/components/FloatingPet';
 
 export type AppStage = 'welcome' | 'personality' | 'chat' | 'itinerary';
 
@@ -94,6 +95,7 @@ export default function Home() {
           />
         )}
       </AnimatePresence>
+      <FloatingPet currentStage={stage} />
     </main>
   );
 }
