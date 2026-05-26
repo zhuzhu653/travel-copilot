@@ -18,6 +18,8 @@ export interface UserPreferences {
     food: number;
     relax: number;
     budget: number;
+    culture: number;
+    nature: number;
   };
 }
 
@@ -48,7 +50,7 @@ export default function Home() {
   const [stage, setStage] = useState<AppStage>('welcome');
   const [preferences, setPreferences] = useState<UserPreferences>({
     personality: null,
-    weights: { crowd: 40, photo: 30, food: 20, relax: 10, budget: 0 },
+    weights: { crowd: 30, photo: 20, food: 20, relax: 10, budget: 10, culture: 5, nature: 5 },
   });
   const [itinerary, setItinerary] = useState<Itinerary | null>(null);
   const [chatHistory, setChatHistory] = useState<Array<{ role: string; content: string }>>([]);

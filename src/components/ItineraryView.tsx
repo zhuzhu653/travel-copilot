@@ -27,13 +27,12 @@ import {
   Lightbulb,
 } from 'lucide-react';
 import type { Itinerary, SpotCard, UserPreferences } from '@/app/page';
-import { MapView } from './MapView';
 
 interface ItineraryViewProps {
   itinerary: Itinerary;
   preferences: UserPreferences;
   onBack: () => void;
-  onVersionSwitch: (version: string) => Promise<void> | void;
+  onVersionSwitch: (version: string) => void;
 }
 
 const versions = [
@@ -50,17 +49,6 @@ export function ItineraryView({ itinerary, preferences, onBack, onVersionSwitch 
   const [showAlert, setShowAlert] = useState(true);
   const [viewMode, setViewMode] = useState<'cards' | 'river'>('cards');
   const [revealedLucky, setRevealedLucky] = useState<Set<string>>(new Set());
-  const [isRegenerating, setIsRegenerating] = useState(false);
-
-  const handleVersionSwitch = async (id: string, label: string) => {
-    setActiveVersion(id);
-    if (label !== '保留原计划') {
-      setIsRegenerating(true);
-    }
-    await onVersionSwitch(label);
-    setIsRegenerating(false);
-    setShowAlert(false);
-  };
 
   const toggleFlip = (id: string) => {
     setFlippedCards((prev) => {
@@ -182,9 +170,12 @@ export function ItineraryView({ itinerary, preferences, onBack, onVersionSwitch 
                   return (
                     <button
                       key={v.id}
-                      onClick={() => handleVersionSwitch(v.id, v.label)}
-                      disabled={isRegenerating}
-                      className="w-full text-left px-4 py-3 rounded-xl bg-slate-50 hover:bg-blue-50 border border-slate-100 hover:border-blue-100 transition-all flex items-center justify-between group disabled:opacity-50"
+                      onClick={() => {
+                        setActiveVersion(v.id);
+                        onVersionSwitch(v.label);
+                        setShowAlert(false);
+                      }}
+                      className="w-full text-left px-4 py-3 rounded-xl bg-slate-50 hover:bg-blue-50 border border-slate-100 hover:border-blue-100 transition-all flex items-center justify-between group"
                     >
                       <div className="flex items-center gap-2">
                         <Icon size={16} className={activeVersion === v.id ? 'text-blue-600' : 'text-slate-500 group-hover:text-blue-600'} />
@@ -205,11 +196,6 @@ export function ItineraryView({ itinerary, preferences, onBack, onVersionSwitch 
       {/* Energy Curve */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 mt-4">
         <EnergyCurve spots={itinerary.days[activeDay]?.spots || []} />
-      </div>
-
-      {/* Map */}
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 mt-4">
-        <MapView spots={itinerary.days[activeDay]?.spots || []} />
       </div>
 
       {/* Content: Cards or Timeline view */}
@@ -268,21 +254,18 @@ export function ItineraryView({ itinerary, preferences, onBack, onVersionSwitch 
       {/* Bottom version switcher (persistent) */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 py-3 px-4 sm:px-6 z-10">
         <div className="max-w-3xl mx-auto flex gap-2 justify-center">
-          {isRegenerating && (
-            <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10">
-              <p className="text-xs text-blue-600 font-medium animate-pulse">正在生成新版本...</p>
-            </div>
-          )}
           {versions.map((v) => {
             const Icon = v.icon;
             return (
               <button
                 key={v.id}
-                onClick={() => handleVersionSwitch(v.id, v.label)}
-                disabled={isRegenerating}
-                className={`text-xs px-3 sm:px-4 py-2 rounded-lg transition-all font-medium flex items-center gap-1.5 disabled:opacity-50 ${
+                onClick={() => {
+                  setActiveVersion(v.id);
+                  onVersionSwitch(v.label);
+                }}
+                className={`text-xs px-3 sm:px-4 py-2 rounded-lg transition-all font-medium flex items-center gap-1.5 ${
                   activeVersion === v.id
-                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-sm'
+                    ? 'bg-slate-950 text-white'
                     : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-100'
                 }`}
               >
@@ -418,33 +401,17 @@ function SpotCardComponent({ spot, isFlipped, onFlip, index, isRevealed, onRevea
   return (
     <motion.div
       whileHover={{ y: -2 }}
-      className="bg-white rounded-2xl overflow-hidden border border-blue-100/60 shadow-sm mb-3"
+      className="bg-white rounded-2xl p-4 sm:p-5 border border-blue-100/60 shadow-sm mb-3"
     >
-      {/* Spot image */}
-      <div className={`relative h-32 sm:h-40 bg-gradient-to-br ${getCategoryGradient(spot.category)} overflow-hidden`}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={getSpotImageUrl(spot)}
-          alt={spot.name}
-          className="absolute inset-0 w-full h-full object-cover"
-          loading="lazy"
-          onError={(e) => {
-            // 如果图片加载失败，隐藏img显示渐变背景
-            (e.target as HTMLImageElement).style.display = 'none';
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-        <div className="absolute bottom-3 left-4 right-4">
-          <div className="flex items-center gap-2">
-            {spot.isLuckySpot && <Gift size={16} className="text-yellow-300" />}
-            <h3 className="font-bold text-white text-lg drop-shadow-sm">{spot.name}</h3>
-          </div>
-          <p className="text-sm text-white/80 mt-0.5">{spot.description}</p>
+      <div className="mb-4">
+        <div className="flex items-center gap-2 mb-1.5">
+          {spot.isLuckySpot && <Gift size={16} className="text-blue-500" />}
+          <h3 className="font-semibold text-slate-800 text-lg">{spot.name}</h3>
         </div>
+        <p className="text-sm text-slate-600 leading-relaxed">{spot.description}</p>
       </div>
 
-      <div className="p-4 sm:p-5">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
         {/* Recommendation Reason */}
         <div className="bg-blue-50/50 rounded-xl p-3 border border-blue-50">
           <div className="flex items-center gap-1.5 mb-1 text-blue-700">
@@ -503,7 +470,6 @@ function SpotCardComponent({ spot, isFlipped, onFlip, index, isRevealed, onRevea
             </div>
           </div>
         )}
-      </div>
       </div>
     </motion.div>
   );
@@ -569,24 +535,5 @@ function getCategoryIcon(category: string) {
     case '休息': return <Coffee size={16} className={iconClass} />;
     case '文化': return <Palette size={16} className={iconClass} />;
     default: return <MapPin size={16} className={iconClass} />;
-  }
-}
-
-// 根据地点名和类别生成配图URL
-function getSpotImageUrl(spot: SpotCard): string {
-  const query = encodeURIComponent(`${spot.name} ${spot.category} travel china`);
-  // 使用 Unsplash Source (基于关键词的图片)
-  return `https://source.unsplash.com/400x250/?${query}`;
-}
-
-// 备用：根据类别使用固定配色渐变
-function getCategoryGradient(category: string): string {
-  switch (category) {
-    case '拍照': return 'from-amber-100 to-orange-100';
-    case '美食': return 'from-red-50 to-orange-50';
-    case '休息': return 'from-green-50 to-emerald-50';
-    case '文化': return 'from-purple-50 to-indigo-50';
-    case '景点': return 'from-sky-50 to-blue-50';
-    default: return 'from-slate-50 to-slate-100';
   }
 }

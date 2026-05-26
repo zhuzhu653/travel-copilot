@@ -1,6 +1,6 @@
 'use client';
 
-import { Users, Camera, UtensilsCrossed, Battery, Wallet } from 'lucide-react';
+import { Users, Camera, UtensilsCrossed, Battery, Wallet, Landmark, TreePine } from 'lucide-react';
 
 interface PreferenceSlidersProps {
   weights: {
@@ -9,6 +9,8 @@ interface PreferenceSlidersProps {
     food: number;
     relax: number;
     budget: number;
+    culture: number;
+    nature: number;
   };
   onChange: (weights: PreferenceSlidersProps['weights']) => void;
 }
@@ -18,6 +20,9 @@ const sliderConfig = [
   { key: 'photo' as const, label: '出片好看', icon: Camera },
   { key: 'food' as const, label: '本地美食', icon: UtensilsCrossed },
   { key: 'relax' as const, label: '行程轻松', icon: Battery },
+  { key: 'budget' as const, label: '预算友好', icon: Wallet },
+  { key: 'culture' as const, label: '文化历史', icon: Landmark },
+  { key: 'nature' as const, label: '自然风光', icon: TreePine },
 ];
 
 export function PreferenceSliders({ weights, onChange }: PreferenceSlidersProps) {
