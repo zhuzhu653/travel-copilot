@@ -86,13 +86,23 @@ export default function Home() {
 
       const data = await res.json();
       if (data.content) {
-        const jsonMatch = data.content.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
+        let jsonStr: string | null = null;
+        const codeBlockMatch = data.content.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/);
+        if (codeBlockMatch) {
+          jsonStr = codeBlockMatch[1].trim();
+        }
+        if (!jsonStr) {
+          const jsonMatch = data.content.match(/\{[\s\S]*\}/);
+          if (jsonMatch) jsonStr = jsonMatch[0];
+        }
+        if (jsonStr) {
           try {
-            const newItinerary = JSON.parse(jsonMatch[0]) as Itinerary;
-            newItinerary.version = version;
-            setItinerary(newItinerary);
-            return newItinerary;
+            const newItinerary = JSON.parse(jsonStr) as Itinerary;
+            if (newItinerary.days?.length > 0) {
+              newItinerary.version = version;
+              setItinerary(newItinerary);
+              return newItinerary;
+            }
           } catch {
             // parse failed
           }

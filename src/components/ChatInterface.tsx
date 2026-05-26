@@ -128,22 +128,46 @@ export function ChatInterface({
 
       const data = await res.json();
       if (data.content) {
-        const jsonMatch = data.content.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
+        // 尝试多种方式提取 JSON
+        let jsonStr: string | null = null;
+        
+        // 1. 尝试匹配 ```json ... ``` 代码块
+        const codeBlockMatch = data.content.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/);
+        if (codeBlockMatch) {
+          jsonStr = codeBlockMatch[1].trim();
+        }
+        
+        // 2. 尝试直接匹配 JSON 对象
+        if (!jsonStr) {
+          const jsonMatch = data.content.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            jsonStr = jsonMatch[0];
+          }
+        }
+
+        if (jsonStr) {
           try {
-            const itinerary = JSON.parse(jsonMatch[0]) as Itinerary;
-            onItineraryGenerated(itinerary);
-            return;
+            const itinerary = JSON.parse(jsonStr) as Itinerary;
+            if (itinerary.title && itinerary.days?.length > 0) {
+              onItineraryGenerated(itinerary);
+              return;
+            }
           } catch {
-            // JSON parse failed, fall through to mock
+            console.error('JSON parse failed, content:', data.content.slice(0, 200));
           }
         }
       }
-      // If we get here, API didn't return valid itinerary JSON
-      onItineraryGenerated(getMockItinerary());
+      // API 返回但解析失败，提示用户重试
+      setChatHistory(prev => [...prev, { 
+        role: 'assistant', 
+        content: '行程生成遇到了一点问题，请再试一次吧！如果持续失败，可以用更具体的描述，比如"去杭州玩两天，想逛西湖和吃本地菜"。' 
+      }]);
     } catch (e) {
       console.error('Generate error:', e);
-      onItineraryGenerated(getMockItinerary());
+      setChatHistory(prev => [...prev, { 
+        role: 'assistant', 
+        content: '网络连接出了点问题，请稍后重试生成行程。' 
+      }]);
     } finally {
       setIsLoading(false);
     }
@@ -347,164 +371,4 @@ export function ChatInterface({
   );
 }
 
-function getMockItinerary(): Itinerary {
-  return {
-    title: '端午上海 Citywalk · 氛围漫游版',
-    version: '经典版',
-    days: [
-      {
-        dayNumber: 1,
-        spots: [
-          {
-            id: '1',
-            name: '杨浦滨江工业遗存带',
-            description: '百年工业遗迹与现代艺术的交融',
-            reason: '人少景美，工业风出片率极高，节假日人流仅为外滩的1/10',
-            crowdLevel: 'low',
-            photoScore: 5,
-            walkingMinutes: 45,
-            bestTime: '9:00-11:00',
-            alternatives: ['复兴岛', '民生码头'],
-            isLuckySpot: false,
-            category: '拍照',
-          },
-          {
-            id: '2',
-            name: '定海桥互助社区',
-            description: '藏在老城区的社区艺术空间',
-            reason: '本地人才知道的文化据点',
-            crowdLevel: 'low',
-            photoScore: 3,
-            walkingMinutes: 20,
-            bestTime: '10:30-12:00',
-            alternatives: ['OCAT上海馆', '明当代美术馆'],
-            isLuckySpot: false,
-            category: '文化',
-          },
-          {
-            id: '3',
-            name: '平凉路菜市场',
-            description: '最地道的上海市井烟火气',
-            reason: '本地人日常采买的菜场，藏着老上海味道的早点摊',
-            crowdLevel: 'medium',
-            photoScore: 4,
-            walkingMinutes: 15,
-            bestTime: '11:30-13:00',
-            alternatives: ['蒙西菜场', '乌中市集'],
-            isLuckySpot: false,
-            category: '美食',
-          },
-          {
-            id: '4',
-            name: 'Free Time Block',
-            description: '找家咖啡馆歇一歇',
-            reason: '上午步行约2小时，建议休息30-45分钟补充能量',
-            crowdLevel: 'low',
-            photoScore: 2,
-            walkingMinutes: 0,
-            bestTime: '13:00-14:00',
-            alternatives: [],
-            isLuckySpot: false,
-            category: '休息',
-          },
-          {
-            id: '5',
-            name: '衡复风貌区支线',
-            description: '梧桐树下的法式老洋房漫步',
-            reason: '避开武康路主干道，支线人流减少70%，出片率不减',
-            crowdLevel: 'low',
-            photoScore: 5,
-            walkingMinutes: 60,
-            bestTime: '14:30-16:30',
-            alternatives: ['愚园路', '新华路'],
-            isLuckySpot: false,
-            category: '拍照',
-          },
-          {
-            id: '6',
-            name: 'Lucky Spot',
-            description: '到达后揭晓的惊喜目的地',
-            reason: '基于你的人格和今日路线特别推荐',
-            crowdLevel: 'low',
-            photoScore: 4,
-            walkingMinutes: 10,
-            bestTime: '17:00-18:00',
-            alternatives: [],
-            isLuckySpot: true,
-            category: '景点',
-          },
-        ],
-      },
-      {
-        dayNumber: 2,
-        spots: [
-          {
-            id: '7',
-            name: '前滩花海公园',
-            description: '城市中的大片花田，视野开阔',
-            reason: '远离市中心，节假日人流低，自然光拍照极佳',
-            crowdLevel: 'low',
-            photoScore: 5,
-            walkingMinutes: 40,
-            bestTime: '8:30-10:30',
-            alternatives: ['辰山植物园', '共青森林公园'],
-            isLuckySpot: false,
-            category: '拍照',
-          },
-          {
-            id: '8',
-            name: '龙华寺素斋',
-            description: '百年古刹的清净素食',
-            reason: '脱离喧嚣的用餐体验，龙华素斋远近闻名',
-            crowdLevel: 'medium',
-            photoScore: 3,
-            walkingMinutes: 15,
-            bestTime: '11:00-12:30',
-            alternatives: ['功德林', '枣子树'],
-            isLuckySpot: false,
-            category: '美食',
-          },
-          {
-            id: '9',
-            name: '午后留白',
-            description: '不安排目的地的自由探索时间',
-            reason: '这段时间属于你，可以就近逛逛或者找一家店发呆',
-            crowdLevel: 'low',
-            photoScore: 0,
-            walkingMinutes: 0,
-            bestTime: '13:00-14:30',
-            alternatives: [],
-            isLuckySpot: false,
-            category: '休息',
-          },
-          {
-            id: '10',
-            name: '西岸艺术中心片区',
-            description: '当代艺术与江景的完美结合',
-            reason: '龙美术馆+西岸美术馆联动，室内为主不怕天气变化',
-            crowdLevel: 'medium',
-            photoScore: 4,
-            walkingMinutes: 50,
-            bestTime: '14:30-17:00',
-            alternatives: ['余德耀美术馆', 'teamLab'],
-            isLuckySpot: false,
-            category: '文化',
-          },
-          {
-            id: '11',
-            name: '永康路小酒馆',
-            description: '落日时分的微醺收尾',
-            reason: '适合旅行最后一站的松弛收尾，氛围感满分',
-            crowdLevel: 'medium',
-            photoScore: 3,
-            walkingMinutes: 10,
-            bestTime: '17:30-19:00',
-            alternatives: ['安福路小酒馆', '巨鹿路'],
-            isLuckySpot: false,
-            category: '美食',
-          },
-        ],
-      },
-    ],
-  };
-}
+// Mock itinerary removed - API errors now show user-friendly retry messages

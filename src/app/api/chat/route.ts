@@ -61,7 +61,7 @@ const GENERATE_PROMPT = `现在请根据用户的需求和偏好生成旅行行�
 
 要求：
 - 每天安排4-6个地点（含1个休息点、1个用餐点）
-- 必须包含1个 Lucky Spot（isLuckySpot: true），描述写"到达后揭晓的惊喜"
+- 必须包含1个 Lucky Spot（isLuckySpot: true），描述写该地点的真实亮点，不要写“到达后揭晓”
 - 避开节假日高人流热门景点
 - 路线要连续合理，不要来回折返
 - 根据用户偏好权重调整推荐（人少权重高则优先小众地点等）`;
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
 
     if (action === 'generate') {
       const prefString = preferences
-        ? `用户偏好权重：人少不挤${preferences.crowd}%、出片好看${preferences.photo}%、本地美食${preferences.food}%、行程轻松${preferences.relax}%、预算友好${preferences.budget}%`
+        ? `用户偏好权重：人少不挤${preferences.crowd || 0}%、出片好看${preferences.photo || 0}%、本地美食${preferences.food || 0}%、行程轻松${preferences.relax || 0}%、预算友好${preferences.budget || 0}%、文化历史${preferences.culture || 0}%、自然风光${preferences.nature || 0}%`
         : '';
       
       systemMessages = [
