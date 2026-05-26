@@ -7,6 +7,7 @@ import type { SpotCard } from '@/app/page';
 interface MapViewProps {
   spots: SpotCard[];
   city?: string;
+  onSpotClick?: (index: number) => void;
 }
 
 declare global {
@@ -16,7 +17,7 @@ declare global {
   }
 }
 
-export function MapView({ spots, city = '上海' }: MapViewProps) {
+export function MapView({ spots, city = '上海', onSpotClick }: MapViewProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -94,10 +95,14 @@ export function MapView({ spots, city = '上海' }: MapViewProps) {
                     font-weight: 600;
                     white-space: nowrap;
                     box-shadow: 0 2px 6px rgba(37,99,235,0.3);
+                    cursor: pointer;
                   ">${i + 1}. ${spot.name}</div>`,
                   direction: 'top',
                   offset: new window.AMap.Pixel(0, -6),
                 },
+              });
+              marker.on('click', () => {
+                if (onSpotClick) onSpotClick(i);
               });
               markers.push(marker);
               map.add(marker);

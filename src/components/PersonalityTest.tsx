@@ -108,12 +108,12 @@ export function PersonalityTest({ onComplete, onSkip }: PersonalityTestProps) {
         {/* Progress */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-3">
-            <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">旅行人格测试</span>
-            <span className="text-xs text-slate-400">{result ? '完成' : `${currentQ + 1} / ${questions.length}`}</span>
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">旅行性格偏好测试</span>
+            <span className="text-xs text-blue-500 font-medium">{result ? '完成' : `${currentQ + 1} / ${questions.length}`}</span>
           </div>
-          <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
+          <div className="h-1.5 bg-blue-100/50 rounded-full overflow-hidden">
             <motion.div
-              className="h-full bg-slate-900 rounded-full"
+              className="h-full bg-blue-500 rounded-full"
               animate={{ width: result ? '100%' : `${((currentQ + 1) / questions.length) * 100}%` }}
               transition={{ duration: 0.4, ease: 'easeOut' }}
             />
@@ -129,11 +129,11 @@ export function PersonalityTest({ onComplete, onSkip }: PersonalityTestProps) {
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <h2 className="text-lg sm:text-xl font-semibold text-slate-900 mb-6 leading-snug">
+              <h2 className="text-lg sm:text-xl font-semibold text-slate-800 mb-6 leading-snug">
                 {questions[currentQ].question}
               </h2>
 
-              <div className="space-y-2.5">
+              <div className="space-y-3">
                 {questions[currentQ].options.map((option, i) => {
                   const Icon = option.icon;
                   return (
@@ -143,12 +143,12 @@ export function PersonalityTest({ onComplete, onSkip }: PersonalityTestProps) {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.06 }}
                       onClick={() => handleAnswer(option.value)}
-                      className="w-full text-left p-4 rounded-xl bg-white border border-slate-150 hover:border-slate-300 hover:shadow-card transition-all flex items-center gap-3.5 group"
+                      className="w-full text-left p-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-blue-100/60 hover:border-blue-200 hover:shadow-sm hover:bg-white transition-all flex items-center gap-3.5 group"
                     >
-                      <div className="w-8 h-8 rounded-lg bg-slate-50 group-hover:bg-slate-100 flex items-center justify-center flex-shrink-0 transition-colors">
-                        <Icon className="w-4 h-4 text-slate-500 group-hover:text-slate-700" strokeWidth={1.5} />
+                      <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0 transition-colors">
+                        <Icon className="w-5 h-5 text-blue-500" strokeWidth={1.8} />
                       </div>
-                      <span className="text-sm text-slate-700 group-hover:text-slate-900 font-medium">
+                      <span className="text-sm text-slate-700 group-hover:text-blue-700 font-medium transition-colors">
                         {option.label}
                       </span>
                     </motion.button>
@@ -163,16 +163,16 @@ export function PersonalityTest({ onComplete, onSkip }: PersonalityTestProps) {
               animate={{ opacity: 1, scale: 1 }}
               className="text-center"
             >
-              <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-slate-950 flex items-center justify-center">
-                <Map className="w-7 h-7 text-white" strokeWidth={1.5} />
+              <div className="w-20 h-20 mx-auto mb-6 rounded-[2rem] bg-white border border-blue-100/60 shadow-sm flex items-center justify-center">
+                <Map className="w-10 h-10 text-blue-500" strokeWidth={1.8} />
               </div>
-              <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">你的旅行人格</p>
-              <h2 className="text-2xl font-semibold text-slate-950 mb-2">{result.name}</h2>
-              <p className="text-sm text-slate-500 mb-10 max-w-[280px] mx-auto">{result.desc}</p>
+              <p className="text-xs text-blue-500 bg-blue-50 px-3 py-1 rounded-full inline-block font-medium tracking-wide mb-3">你的旅行人格</p>
+              <h2 className="text-2xl font-bold text-slate-800 mb-2">{result.name}</h2>
+              <p className="text-sm text-slate-500 mb-10 max-w-[280px] mx-auto leading-relaxed">{result.desc}</p>
 
               <button
                 onClick={() => onComplete(result.name)}
-                className="w-full bg-slate-950 hover:bg-slate-800 text-white py-3.5 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-sm shadow-blue-200 text-white py-3.5 rounded-2xl text-sm font-semibold transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
               >
                 开始规划旅行
                 <ArrowRight className="w-4 h-4" strokeWidth={2} />

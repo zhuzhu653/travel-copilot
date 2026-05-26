@@ -26,7 +26,10 @@ export function ChatInterface({
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showSliders, setShowSliders] = useState(showSlidersOnMount);
-  const [messageCount, setMessageCount] = useState(0);
+  const [messageCount, setMessageCount] = useState(() => {
+    // 返回时用已有聊天记录的用户消息数来初始化
+    return chatHistory.filter(m => m.role === 'user').length;
+  });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

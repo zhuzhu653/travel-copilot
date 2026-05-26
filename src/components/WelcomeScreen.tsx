@@ -22,8 +22,8 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
         className="text-center w-full max-w-sm"
       >
         {/* Logo - friendly blue circle */}
-        <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-200">
-          <Compass className="w-8 h-8 text-white" strokeWidth={1.8} />
+        <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-white flex items-center justify-center shadow-sm border border-blue-100/60">
+          <Compass className="w-8 h-8 text-blue-500" strokeWidth={1.8} />
         </div>
 
         <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 tracking-tight mb-2">
@@ -74,7 +74,7 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
       >
         <button
           onClick={onStart}
-          className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3.5 rounded-2xl text-sm font-semibold transition-all shadow-lg shadow-blue-200 hover:shadow-xl hover:shadow-blue-300 active:scale-[0.98]"
+          className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3.5 rounded-2xl text-sm font-semibold transition-all shadow-sm shadow-blue-200 hover:shadow-md hover:shadow-blue-300 active:scale-[0.98]"
         >
           开始旅行 ✈️
         </button>

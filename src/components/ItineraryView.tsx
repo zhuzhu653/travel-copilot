@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
@@ -25,14 +25,17 @@ import {
   Bot,
   ChevronRight,
   Lightbulb,
+  Loader,
 } from 'lucide-react';
 import type { Itinerary, SpotCard, UserPreferences } from '@/app/page';
+import { MapView } from './MapView';
 
 interface ItineraryViewProps {
   itinerary: Itinerary;
   preferences: UserPreferences;
   onBack: () => void;
-  onVersionSwitch: (version: string) => void;
+  onVersionSwitch: (version: string) => Promise<Itinerary | null>;
+  cachedVersions?: Record<string, Itinerary>;
 }
 
 const versions = [
@@ -42,13 +45,45 @@ const versions = [
   { id: 'photo', label: '拍照优先版', desc: '出片为主', icon: Camera },
 ];
 
-export function ItineraryView({ itinerary, preferences, onBack, onVersionSwitch }: ItineraryViewProps) {
+export function ItineraryView({ itinerary, preferences, onBack, onVersionSwitch, cachedVersions = {} }: ItineraryViewProps) {
   const [activeDay, setActiveDay] = useState(0);
   const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
   const [activeVersion, setActiveVersion] = useState('classic');
   const [showAlert, setShowAlert] = useState(true);
   const [viewMode, setViewMode] = useState<'cards' | 'river'>('cards');
   const [revealedLucky, setRevealedLucky] = useState<Set<string>>(new Set());
+  const [currentItinerary, setCurrentItinerary] = useState<Itinerary>(itinerary);
+  const [versionCache, setVersionCache] = useState<Record<string, Itinerary>>({ classic: itinerary, ...cachedVersions });
+  const [isRegenerating, setIsRegenerating] = useState(false);
+  const [highlightedSpot, setHighlightedSpot] = useState<number | null>(null);
+  const spotRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const handleVersionSwitch = async (versionId: string, label: string) => {
+    setActiveVersion(versionId);
+    if (label === '保留原计划') {
+      setCurrentItinerary(versionCache['classic'] || itinerary);
+      return;
+    }
+    // Check cache first
+    if (versionCache[versionId]) {
+      setCurrentItinerary(versionCache[versionId]);
+      return;
+    }
+    // Generate new version
+    setIsRegenerating(true);
+    const result = await onVersionSwitch(label);
+    if (result) {
+      setVersionCache(prev => ({ ...prev, [versionId]: result }));
+      setCurrentItinerary(result);
+    }
+    setIsRegenerating(false);
+  };
+
+  const handleMapSpotClick = (index: number) => {
+    setHighlightedSpot(index);
+    spotRefs.current[index]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => setHighlightedSpot(null), 2000);
+  };
 
   const toggleFlip = (id: string) => {
     setFlippedCards((prev) => {
@@ -81,12 +116,12 @@ export function ItineraryView({ itinerary, preferences, onBack, onVersionSwitch 
               {itinerary.version}
             </span>
           </div>
-          <h1 className="text-lg sm:text-xl font-semibold text-slate-900 tracking-tight">{itinerary.title}</h1>
+          <h1 className="text-lg sm:text-xl font-bold text-slate-800 tracking-tight">{itinerary.title}</h1>
           {/* Travel Card button */}
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="mt-3 text-xs bg-slate-50 border border-slate-100 text-slate-600 px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5 hover:bg-slate-100 transition-colors"
+            className="mt-3 text-xs bg-white border border-blue-100/60 shadow-sm text-blue-600 px-4 py-2 rounded-xl font-semibold flex items-center gap-1.5 hover:bg-blue-50 transition-colors"
             onClick={() => {
               const spotsCount = itinerary.days.reduce((a, d) => a + d.spots.length, 0);
               const luckyCount = itinerary.days.reduce((a, d) => a + d.spots.filter(s => s.isLuckySpot).length, 0);
@@ -105,10 +140,10 @@ export function ItineraryView({ itinerary, preferences, onBack, onVersionSwitch 
               <button
                 key={day.dayNumber}
                 onClick={() => setActiveDay(i)}
-                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm ${
                   activeDay === i
-                    ? 'bg-slate-950 text-white'
-                    : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-100'
+                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white border-none'
+                    : 'bg-white text-slate-500 hover:text-slate-700 border border-blue-100/60'
                 }`}
               >
                 Day {day.dayNumber}
@@ -116,20 +151,20 @@ export function ItineraryView({ itinerary, preferences, onBack, onVersionSwitch 
             ))}
           </div>
           {/* View mode toggle */}
-          <div className="flex gap-0.5 bg-slate-50 rounded-lg p-0.5 border border-slate-100">
+          <div className="flex gap-0.5 bg-slate-50/50 rounded-xl p-1 border border-blue-100/50">
             <button
               onClick={() => setViewMode('cards')}
-              className={`p-1.5 rounded-md transition-all ${viewMode === 'cards' ? 'bg-white shadow-xs text-slate-900' : 'text-slate-400'}`}
+              className={`p-1.5 rounded-lg transition-all ${viewMode === 'cards' ? 'bg-white shadow-sm text-blue-600 font-semibold' : 'text-slate-400'}`}
               title="卡牌视图"
             >
-              <LayoutGrid size={14} />
+              <LayoutGrid size={16} />
             </button>
             <button
               onClick={() => setViewMode('river')}
-              className={`p-1.5 rounded-md transition-all ${viewMode === 'river' ? 'bg-white shadow-xs text-slate-900' : 'text-slate-400'}`}
+              className={`p-1.5 rounded-lg transition-all ${viewMode === 'river' ? 'bg-white shadow-sm text-blue-600 font-semibold' : 'text-slate-400'}`}
               title="时间线视图"
             >
-              <AlignJustify size={14} />
+              <AlignJustify size={16} />
             </button>
           </div>
         </div>
@@ -171,11 +206,11 @@ export function ItineraryView({ itinerary, preferences, onBack, onVersionSwitch 
                     <button
                       key={v.id}
                       onClick={() => {
-                        setActiveVersion(v.id);
-                        onVersionSwitch(v.label);
+                        handleVersionSwitch(v.id, v.label);
                         setShowAlert(false);
                       }}
-                      className="w-full text-left px-4 py-3 rounded-xl bg-slate-50 hover:bg-blue-50 border border-slate-100 hover:border-blue-100 transition-all flex items-center justify-between group"
+                      disabled={isRegenerating}
+                      className="w-full text-left px-4 py-3 rounded-xl bg-slate-50 hover:bg-blue-50 border border-slate-100 hover:border-blue-100 transition-all flex items-center justify-between group disabled:opacity-50"
                     >
                       <div className="flex items-center gap-2">
                         <Icon size={16} className={activeVersion === v.id ? 'text-blue-600' : 'text-slate-500 group-hover:text-blue-600'} />
@@ -195,8 +230,26 @@ export function ItineraryView({ itinerary, preferences, onBack, onVersionSwitch 
 
       {/* Energy Curve */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 mt-4">
-        <EnergyCurve spots={itinerary.days[activeDay]?.spots || []} />
+        <EnergyCurve spots={currentItinerary.days[activeDay]?.spots || []} />
       </div>
+
+      {/* Map - linked to spots */}
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 mt-4">
+        <MapView
+          spots={currentItinerary.days[activeDay]?.spots || []}
+          onSpotClick={handleMapSpotClick}
+        />
+      </div>
+
+      {/* Regenerating overlay */}
+      {isRegenerating && (
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 mt-4">
+          <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-center justify-center gap-2">
+            <Loader size={16} className="text-blue-500 animate-spin" />
+            <span className="text-sm text-blue-600 font-medium">正在生成新版本...</span>
+          </div>
+        </div>
+      )}
 
       {/* Content: Cards or Timeline view */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 mt-6">
@@ -227,12 +280,14 @@ export function ItineraryView({ itinerary, preferences, onBack, onVersionSwitch 
         {viewMode === 'cards' ? (
           <div className="space-y-3">
             <AnimatePresence>
-              {itinerary.days[activeDay]?.spots.map((spot, i) => (
+              {currentItinerary.days[activeDay]?.spots.map((spot, i) => (
                 <motion.div
                   key={spot.id}
+                  ref={(el) => { spotRefs.current[i] = el; }}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.06 }}
+                  className={highlightedSpot === i ? 'ring-2 ring-blue-400 rounded-2xl transition-all' : ''}
                 >
                   <SpotCardComponent
                     spot={spot}
@@ -247,30 +302,38 @@ export function ItineraryView({ itinerary, preferences, onBack, onVersionSwitch 
             </AnimatePresence>
           </div>
         ) : (
-          <TimelineView spots={itinerary.days[activeDay]?.spots || []} />
+          <TimelineView spots={currentItinerary.days[activeDay]?.spots || []} />
         )}
       </div>
 
       {/* Bottom version switcher (persistent) */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 py-3 px-4 sm:px-6 z-10">
-        <div className="max-w-3xl mx-auto flex gap-2 justify-center">
+      <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-blue-100/50 py-4 px-4 sm:px-6 z-10 shadow-[0_-4px_24px_rgba(0,0,0,0.02)]">
+        <div className="max-w-3xl mx-auto flex flex-wrap gap-2.5 justify-center relative">
+          {isRegenerating && (
+            <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10 rounded-xl">
+              <Loader size={14} className="text-blue-500 animate-spin mr-1.5" />
+              <span className="text-xs text-blue-600 font-medium">切换中...</span>
+            </div>
+          )}
           {versions.map((v) => {
             const Icon = v.icon;
+            const isCached = !!versionCache[v.id];
             return (
               <button
                 key={v.id}
-                onClick={() => {
-                  setActiveVersion(v.id);
-                  onVersionSwitch(v.label);
-                }}
-                className={`text-xs px-3 sm:px-4 py-2 rounded-lg transition-all font-medium flex items-center gap-1.5 ${
+                onClick={() => handleVersionSwitch(v.id, v.label)}
+                disabled={isRegenerating}
+                className={`text-xs px-4 sm:px-5 py-2.5 rounded-xl transition-all font-semibold flex items-center gap-1.5 shadow-sm active:scale-[0.98] disabled:opacity-50 ${
                   activeVersion === v.id
-                    ? 'bg-slate-950 text-white'
-                    : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-100'
+                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white border-transparent'
+                    : 'bg-white text-slate-600 hover:text-blue-600 border border-blue-100'
                 }`}
               >
-                <Icon size={12} />
+                <Icon size={14} />
                 {v.label}
+                {isCached && v.id !== 'classic' && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 ml-0.5" title="已缓存" />
+                )}
               </button>
             );
           })}
@@ -401,15 +464,31 @@ function SpotCardComponent({ spot, isFlipped, onFlip, index, isRevealed, onRevea
   return (
     <motion.div
       whileHover={{ y: -2 }}
-      className="bg-white rounded-2xl p-4 sm:p-5 border border-blue-100/60 shadow-sm mb-3"
+      className="bg-white rounded-2xl overflow-hidden border border-blue-100/60 shadow-sm mb-3"
     >
-      <div className="mb-4">
-        <div className="flex items-center gap-2 mb-1.5">
-          {spot.isLuckySpot && <Gift size={16} className="text-blue-500" />}
-          <h3 className="font-semibold text-slate-800 text-lg">{spot.name}</h3>
+      {/* Spot image header */}
+      <div className={`relative h-28 sm:h-36 bg-gradient-to-br ${getCategoryGradient(spot.category)} overflow-hidden`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={getSpotImageUrl(spot)}
+          alt={spot.name}
+          className="absolute inset-0 w-full h-full object-cover"
+          loading="lazy"
+          onError={(e) => {
+            (e.target as HTMLImageElement).style.display = 'none';
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+        <div className="absolute bottom-3 left-4 right-4">
+          <div className="flex items-center gap-2">
+            {spot.isLuckySpot && <Gift size={16} className="text-yellow-300" />}
+            <h3 className="font-bold text-white text-lg drop-shadow-sm">{spot.name}</h3>
+          </div>
+          <p className="text-xs text-white/80 mt-0.5 line-clamp-1">{spot.description}</p>
         </div>
-        <p className="text-sm text-slate-600 leading-relaxed">{spot.description}</p>
       </div>
+
+      <div className="p-4 sm:p-5">
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
         {/* Recommendation Reason */}
@@ -470,6 +549,7 @@ function SpotCardComponent({ spot, isFlipped, onFlip, index, isRevealed, onRevea
             </div>
           </div>
         )}
+      </div>
       </div>
     </motion.div>
   );
@@ -535,5 +615,23 @@ function getCategoryIcon(category: string) {
     case '休息': return <Coffee size={16} className={iconClass} />;
     case '文化': return <Palette size={16} className={iconClass} />;
     default: return <MapPin size={16} className={iconClass} />;
+  }
+}
+
+// 根据地点名和类别生成配图URL
+function getSpotImageUrl(spot: SpotCard): string {
+  const query = encodeURIComponent(`${spot.name} ${spot.category} china travel`);
+  return `https://source.unsplash.com/400x250/?${query}`;
+}
+
+// 根据类别使用配色渐变作为图片fallback
+function getCategoryGradient(category: string): string {
+  switch (category) {
+    case '拍照': return 'from-amber-100 to-orange-100';
+    case '美食': return 'from-red-50 to-orange-50';
+    case '休息': return 'from-green-50 to-emerald-50';
+    case '文化': return 'from-purple-50 to-indigo-50';
+    case '景点': return 'from-sky-50 to-blue-50';
+    default: return 'from-slate-50 to-slate-100';
   }
 }

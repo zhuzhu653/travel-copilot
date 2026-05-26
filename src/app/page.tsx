@@ -56,7 +56,7 @@ export default function Home() {
   const [chatHistory, setChatHistory] = useState<Array<{ role: string; content: string }>>([]);
   const [returnedFromItinerary, setReturnedFromItinerary] = useState(false);
 
-  const handleVersionSwitch = async (version: string) => {
+  const handleVersionSwitch = async (version: string): Promise<Itinerary | null> => {
     // 真正重新生成不同版本的行程
     try {
       const versionPrompt: Record<string, string> = {
@@ -68,8 +68,7 @@ export default function Home() {
 
       const extraInstruction = versionPrompt[version] || '';
       if (!extraInstruction) {
-        // 保留原计划，不需要重新生成
-        return;
+        return itinerary;
       }
 
       const res = await fetch('/api/chat', {
@@ -93,16 +92,15 @@ export default function Home() {
             const newItinerary = JSON.parse(jsonMatch[0]) as Itinerary;
             newItinerary.version = version;
             setItinerary(newItinerary);
-            return;
+            return newItinerary;
           } catch {
             // parse failed
           }
         }
       }
-      // 如果重新生成失败，只更新版本标签
-      setItinerary((prev) => prev ? { ...prev, version } : null);
+      return null;
     } catch {
-      setItinerary((prev) => prev ? { ...prev, version } : null);
+      return null;
     }
   };
 
