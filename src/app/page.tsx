@@ -52,6 +52,57 @@ export default function Home() {
   });
   const [itinerary, setItinerary] = useState<Itinerary | null>(null);
   const [chatHistory, setChatHistory] = useState<Array<{ role: string; content: string }>>([]);
+  const [returnedFromItinerary, setReturnedFromItinerary] = useState(false);
+
+  const handleVersionSwitch = async (version: string) => {
+    // 真正重新生成不同版本的行程
+    try {
+      const versionPrompt: Record<string, string> = {
+        '保留原计划': '',
+        '轻松版': '请将行程调整为轻松版：减少步行时间，增加休息点，每天最多4个地点，避免连续高体力消耗。',
+        '雨天版': '请将行程调整为雨天版：优先室内场所（博物馆、咖啡馆、商场、书店），减少户外行走。',
+        '拍照优先版': '请将行程调整为拍照优先版：优先选择出片率高的地点，注意光线时间段，增加拍照打卡点。',
+      };
+
+      const extraInstruction = versionPrompt[version] || '';
+      if (!extraInstruction) {
+        // 保留原计划，不需要重新生成
+        return;
+      }
+
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            ...chatHistory.map((m) => ({ role: m.role, content: m.content })),
+            { role: 'user', content: extraInstruction },
+          ],
+          action: 'generate',
+          preferences: preferences.weights,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.content) {
+        const jsonMatch = data.content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try {
+            const newItinerary = JSON.parse(jsonMatch[0]) as Itinerary;
+            newItinerary.version = version;
+            setItinerary(newItinerary);
+            return;
+          } catch {
+            // parse failed
+          }
+        }
+      }
+      // 如果重新生成失败，只更新版本标签
+      setItinerary((prev) => prev ? { ...prev, version } : null);
+    } catch {
+      setItinerary((prev) => prev ? { ...prev, version } : null);
+    }
+  };
 
   return (
     <main className="min-h-screen">
@@ -80,6 +131,7 @@ export default function Home() {
               setItinerary(it);
               setStage('itinerary');
             }}
+            showSlidersOnMount={returnedFromItinerary}
           />
         )}
         {stage === 'itinerary' && itinerary && (
@@ -87,11 +139,11 @@ export default function Home() {
             key="itinerary"
             itinerary={itinerary}
             preferences={preferences}
-            onBack={() => setStage('chat')}
-            onVersionSwitch={(version) => {
-              // Will trigger re-generation with different version
-              setItinerary((prev) => prev ? { ...prev, version } : null);
+            onBack={() => {
+              setReturnedFromItinerary(true);
+              setStage('chat');
             }}
+            onVersionSwitch={handleVersionSwitch}
           />
         )}
       </AnimatePresence>

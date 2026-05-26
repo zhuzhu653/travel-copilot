@@ -14,11 +14,10 @@ interface PreferenceSlidersProps {
 }
 
 const sliderConfig = [
-  { key: 'crowd' as const, label: '人少', icon: Users },
-  { key: 'photo' as const, label: '出片', icon: Camera },
-  { key: 'food' as const, label: '美食', icon: UtensilsCrossed },
-  { key: 'relax' as const, label: '轻松', icon: Battery },
-  { key: 'budget' as const, label: '省钱', icon: Wallet },
+  { key: 'crowd' as const, label: '人少不挤', icon: Users },
+  { key: 'photo' as const, label: '出片好看', icon: Camera },
+  { key: 'food' as const, label: '本地美食', icon: UtensilsCrossed },
+  { key: 'relax' as const, label: '行程轻松', icon: Battery },
 ];
 
 export function PreferenceSliders({ weights, onChange }: PreferenceSlidersProps) {
@@ -32,10 +31,10 @@ export function PreferenceSliders({ weights, onChange }: PreferenceSlidersProps)
 
   return (
     <div className="px-5 sm:px-6 py-4">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">偏好权重</h3>
+      <div className="flex items-center justify-between mb-3 pl-2">
+        <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">把隐性需求转化为规划权重</h3>
         <span className="text-2xs text-slate-400">
-          拖动滑块调整比重，自动归一化到 100%
+          拖动滑块分布你的 100% 期待
         </span>
       </div>
 

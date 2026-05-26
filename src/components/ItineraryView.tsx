@@ -24,6 +24,7 @@ import {
   Activity,
   Bot,
   ChevronRight,
+  Lightbulb,
 } from 'lucide-react';
 import type { Itinerary, SpotCard, UserPreferences } from '@/app/page';
 
@@ -31,7 +32,7 @@ interface ItineraryViewProps {
   itinerary: Itinerary;
   preferences: UserPreferences;
   onBack: () => void;
-  onVersionSwitch: (version: string) => void;
+  onVersionSwitch: (version: string) => Promise<void> | void;
 }
 
 const versions = [
@@ -48,6 +49,17 @@ export function ItineraryView({ itinerary, preferences, onBack, onVersionSwitch 
   const [showAlert, setShowAlert] = useState(true);
   const [viewMode, setViewMode] = useState<'cards' | 'river'>('cards');
   const [revealedLucky, setRevealedLucky] = useState<Set<string>>(new Set());
+  const [isRegenerating, setIsRegenerating] = useState(false);
+
+  const handleVersionSwitch = async (id: string, label: string) => {
+    setActiveVersion(id);
+    if (label !== '保留原计划') {
+      setIsRegenerating(true);
+    }
+    await onVersionSwitch(label);
+    setIsRegenerating(false);
+    setShowAlert(false);
+  };
 
   const toggleFlip = (id: string) => {
     setFlippedCards((prev) => {
@@ -169,12 +181,9 @@ export function ItineraryView({ itinerary, preferences, onBack, onVersionSwitch 
                   return (
                     <button
                       key={v.id}
-                      onClick={() => {
-                        setActiveVersion(v.id);
-                        onVersionSwitch(v.label);
-                        setShowAlert(false);
-                      }}
-                      className="w-full text-left px-4 py-3 rounded-xl bg-slate-50 hover:bg-blue-50 border border-slate-100 hover:border-blue-100 transition-all flex items-center justify-between group"
+                      onClick={() => handleVersionSwitch(v.id, v.label)}
+                      disabled={isRegenerating}
+                      className="w-full text-left px-4 py-3 rounded-xl bg-slate-50 hover:bg-blue-50 border border-slate-100 hover:border-blue-100 transition-all flex items-center justify-between group disabled:opacity-50"
                     >
                       <div className="flex items-center gap-2">
                         <Icon size={16} className={activeVersion === v.id ? 'text-blue-600' : 'text-slate-500 group-hover:text-blue-600'} />
@@ -199,6 +208,30 @@ export function ItineraryView({ itinerary, preferences, onBack, onVersionSwitch 
 
       {/* Content: Cards or Timeline view */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 mt-6">
+        {/* AI Generator Explanation Section (Step 3 Image style) */}
+        {viewMode === 'cards' && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex gap-3 mb-6"
+          >
+            <div className="w-8 h-8 rounded-full bg-white border border-blue-100 flex items-center justify-center shrink-0 shadow-sm">
+              <Bot size={16} className="text-blue-600" />
+            </div>
+            <div className="bg-white border border-blue-100/60 shadow-sm rounded-2xl rounded-tl-sm px-4 py-3 min-w-0 flex-1">
+              <p className="text-sm font-medium text-slate-800 leading-relaxed mb-1.5">
+                行程已生成！已避开外滩、武康大楼、豫园等节假日高人流点位，推荐杨浦滨江、前滩花海、衡复风貌区支线。
+              </p>
+              <div className="flex gap-1.5 items-center mt-2.5">
+                <span className="text-[10px] sm:text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md font-medium flex items-center gap-1">
+                  <Lightbulb size={12} />
+                  展示重点：解决决策黑箱，让你知道为什么这样安排
+                </span>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {viewMode === 'cards' ? (
           <div className="space-y-3">
             <AnimatePresence>
@@ -229,18 +262,21 @@ export function ItineraryView({ itinerary, preferences, onBack, onVersionSwitch 
       {/* Bottom version switcher (persistent) */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 py-3 px-4 sm:px-6 z-10">
         <div className="max-w-3xl mx-auto flex gap-2 justify-center">
+          {isRegenerating && (
+            <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10">
+              <p className="text-xs text-blue-600 font-medium animate-pulse">正在生成新版本...</p>
+            </div>
+          )}
           {versions.map((v) => {
             const Icon = v.icon;
             return (
               <button
                 key={v.id}
-                onClick={() => {
-                  setActiveVersion(v.id);
-                  onVersionSwitch(v.label);
-                }}
-                className={`text-xs px-3 sm:px-4 py-2 rounded-lg transition-all font-medium flex items-center gap-1.5 ${
+                onClick={() => handleVersionSwitch(v.id, v.label)}
+                disabled={isRegenerating}
+                className={`text-xs px-3 sm:px-4 py-2 rounded-lg transition-all font-medium flex items-center gap-1.5 disabled:opacity-50 ${
                   activeVersion === v.id
-                    ? 'bg-slate-950 text-white'
+                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-sm'
                     : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-100'
                 }`}
               >

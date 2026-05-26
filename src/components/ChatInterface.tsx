@@ -12,6 +12,7 @@ interface ChatInterfaceProps {
   chatHistory: Array<{ role: string; content: string }>;
   setChatHistory: React.Dispatch<React.SetStateAction<Array<{ role: string; content: string }>>>;
   onItineraryGenerated: (itinerary: Itinerary) => void;
+  showSlidersOnMount?: boolean;
 }
 
 export function ChatInterface({
@@ -20,10 +21,11 @@ export function ChatInterface({
   chatHistory,
   setChatHistory,
   onItineraryGenerated,
+  showSlidersOnMount = false,
 }: ChatInterfaceProps) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showSliders, setShowSliders] = useState(false);
+  const [showSliders, setShowSliders] = useState(showSlidersOnMount);
   const [messageCount, setMessageCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -34,8 +36,8 @@ export function ChatInterface({
   useEffect(() => {
     if (chatHistory.length === 0) {
       const welcomeMsg = preferences.personality
-        ? `你好，${preferences.personality}。告诉我你的旅行想法——想去哪、玩几天、有什么特别想做的事？`
-        : '你好，告诉我你的旅行想法——想去哪、玩几天、有什么特别想做的事？随便聊聊就好。';
+        ? `你好，我是你的AI旅行规划师。不直接生成排篇攻略，先来聊聊你的需求吧！想去哪、玩几天、有什么特别想做的事？`
+        : '你好，我是你的AI旅行规划师。不直接粗暴套模板，先来聊聊你的需求吧！想去哪、玩几天、有什么特别想做的事？';
       setChatHistory([{ role: 'assistant', content: welcomeMsg }]);
     }
   }, []);
@@ -184,8 +186,8 @@ export function ChatInterface({
             <p className="text-xs text-slate-400 font-medium">试试这些：</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {[
-                '端午想去杭州玩两天，松弛一点的那种',
-                '周末上海citywalk，喜欢拍照和咖啡',
+                '端午去上海玩两天，想citywalk、拍照打卡、吃吃喝喝',
+                '去杭州两天，松弛一点，不特种兵',
                 '想找个海边小城发呆三天，预算2000以内',
                 '第一次去日本，5天自由行求攻略',
               ].map((text, i) => (
@@ -258,8 +260,20 @@ export function ChatInterface({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="border-t border-slate-100 bg-slate-25 overflow-hidden"
+            className="border-t border-blue-100/50 bg-slate-50/50 overflow-hidden relative"
           >
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-200 to-transparent opacity-50" />
+            
+            {/* Context Bubble inside slider */}
+            <div className="mx-5 sm:mx-6 mt-4 mb-2 flex items-start gap-2">
+              <div className="w-6 h-6 shrink-0 rounded-full flex items-center justify-center shadow-sm bg-white border border-blue-100">
+                <Bot className="w-3.5 h-3.5 text-blue-600" />
+              </div>
+              <div className="bg-white border border-blue-100/60 shadow-sm rounded-2xl rounded-tl-sm px-3.5 py-2 text-xs text-slate-700 font-medium">
+                这次旅行你更看重什么呢？让我来为你定制吧：
+              </div>
+            </div>
+
             <PreferenceSliders
               weights={preferences.weights}
               onChange={(weights) => setPreferences((p) => ({ ...p, weights }))}
