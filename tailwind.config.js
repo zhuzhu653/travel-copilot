@@ -8,73 +8,62 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: '#eff8ff',
-          100: '#dbeefe',
-          200: '#bfdffd',
-          300: '#93cbfb',
-          400: '#60aef7',
-          500: '#3b8ff2',
-          600: '#2570e7',
-          700: '#1d5bd4',
-          800: '#1e4aac',
-          900: '#1e4088',
-          950: '#172953',
+        brand: {
+          50: '#f0f7ff',
+          100: '#e0effe',
+          200: '#b9dffd',
+          300: '#7cc5fc',
+          400: '#36a7f8',
+          500: '#0c8ce9',
+          600: '#006fc7',
+          800: '#064e8c',
         },
-        sky: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-        },
-        navy: {
-          700: '#1e3a5f',
-          800: '#1a2f4d',
-          900: '#0f1d33',
-        },
-        glass: {
-          white: 'rgba(255, 255, 255, 0.72)',
-          light: 'rgba(255, 255, 255, 0.45)',
+        slate: {
+          25: '#fcfcfd',
+          50: '#f8fafc',
+          75: '#f3f6f9',
+          950: '#0c1222',
         },
       },
       fontFamily: {
-        sans: ['"Noto Sans SC"', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Noto Sans SC"', 'sans-serif'],
       },
-      animation: {
-        'float': 'float 3s ease-in-out infinite',
-        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'shimmer': 'shimmer 2.5s linear infinite',
-        'river-flow': 'riverFlow 8s linear infinite',
-        'glow': 'glow 2s ease-in-out infinite alternate',
+      fontSize: {
+        '2xs': ['0.6875rem', { lineHeight: '1rem' }],
       },
-      keyframes: {
-        float: {
-          '0%, 100%': { transform: 'translateY(0px)' },
-          '50%': { transform: 'translateY(-10px)' },
-        },
-        shimmer: {
-          '0%': { backgroundPosition: '-200% 0' },
-          '100%': { backgroundPosition: '200% 0' },
-        },
-        riverFlow: {
-          '0%': { backgroundPosition: '0% 50%' },
-          '100%': { backgroundPosition: '200% 50%' },
-        },
-        glow: {
-          '0%': { boxShadow: '0 0 20px rgba(59, 143, 242, 0.2)' },
-          '100%': { boxShadow: '0 0 30px rgba(59, 143, 242, 0.4)' },
-        },
+      spacing: {
+        '4.5': '1.125rem',
+        '18': '4.5rem',
       },
-      backdropBlur: {
-        xs: '2px',
+      borderRadius: {
+        '2xl': '1rem',
+        '3xl': '1.5rem',
       },
       boxShadow: {
-        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.12)',
-        'card': '0 4px 24px rgba(0, 0, 0, 0.06)',
-        'card-hover': '0 8px 40px rgba(0, 0, 0, 0.1)',
-        'glow-blue': '0 0 40px rgba(59, 143, 242, 0.15)',
+        'xs': '0 1px 2px 0 rgba(0, 0, 0, 0.03)',
+        'subtle': '0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.03)',
+        'card': '0 2px 8px -1px rgba(0, 0, 0, 0.05), 0 1px 3px -1px rgba(0, 0, 0, 0.03)',
+        'elevated': '0 4px 16px -2px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04)',
+        'float': '0 8px 30px -4px rgba(0, 0, 0, 0.1), 0 4px 10px -4px rgba(0, 0, 0, 0.04)',
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.5s ease-out',
+        'slide-up': 'slideUp 0.4s ease-out',
+        'pulse-subtle': 'pulseSubtle 3s ease-in-out infinite',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        slideUp: {
+          '0%': { opacity: '0', transform: 'translateY(8px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        pulseSubtle: {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.7' },
+        },
       },
     },
   },

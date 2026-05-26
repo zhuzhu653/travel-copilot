@@ -2,14 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Travel Copilot — 智旅伴侣',
+  title: 'Travel Copilot',
   description: '不替你安排满每一分钟，只在关键时刻帮你做出更好的选择',
-  manifest: '/manifest.json',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'default',
-    title: 'Travel Copilot',
-  },
 };
 
 export const viewport: Viewport = {
@@ -17,7 +11,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#eff8ff',
+  themeColor: '#ffffff',
 };
 
 export default function RootLayout({
@@ -31,7 +25,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
-      <body className="font-sans antialiased min-h-screen overflow-x-hidden">
+      <body className="font-sans min-h-screen">
         {children}
       </body>
     </html>

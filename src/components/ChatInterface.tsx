@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Send, SlidersHorizontal, Lightbulb, Sparkles, Compass } from 'lucide-react';
 import { PreferenceSliders } from './PreferenceSliders';
 import type { UserPreferences, Itinerary } from '@/app/page';
 
@@ -30,13 +31,11 @@ export function ChatInterface({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatHistory]);
 
-  // Show welcome message on first load
   useEffect(() => {
     if (chatHistory.length === 0) {
       const welcomeMsg = preferences.personality
-        ? `嗨！看起来你是一个「${preferences.personality}」✨ 很高兴成为你的旅行搭子～\n\n告诉我你的旅行想法吧，比如想去哪、玩几天、有什么特别想做的事？`
-        : '嗨！我是你的旅行搭子 🧭\n\n告诉我你的旅行想法吧——想去哪、玩几天、有什么特别想做的事？随便聊聊就好～';
-      
+        ? `你好，${preferences.personality}。告诉我你的旅行想法——想去哪、玩几天、有什么特别想做的事？`
+        : '你好，告诉我你的旅行想法——想去哪、玩几天、有什么特别想做的事？随便聊聊就好。';
       setChatHistory([{ role: 'assistant', content: welcomeMsg }]);
     }
   }, []);
@@ -67,13 +66,12 @@ export function ChatInterface({
     } catch {
       setChatHistory([
         ...newMessages,
-        { role: 'assistant', content: '抱歉，网络有点问题，请再试一次 🙏' },
+        { role: 'assistant', content: '网络连接出现问题，请稍后再试。' },
       ]);
     } finally {
       setIsLoading(false);
     }
 
-    // After 2 user messages, show preference sliders
     if (messageCount >= 1 && !showSliders) {
       setShowSliders(true);
     }
@@ -98,15 +96,12 @@ export function ChatInterface({
 
       const data = await res.json();
       if (data.content) {
-        setChatHistory((prev) => [
-          ...prev,
-          { role: 'assistant', content: `💡 灵感发现\n\n${data.content}` },
-        ]);
+        setChatHistory((prev) => [...prev, { role: 'assistant', content: data.content }]);
       }
     } catch {
       setChatHistory((prev) => [
         ...prev,
-        { role: 'assistant', content: '💡 冷知识：上海的弄堂里藏着很多隐蔽的咖啡馆，老虎窗外晾着衣服，里面却是精品手冲——这就是上海的"违和感美学"。' },
+        { role: 'assistant', content: '上海的弄堂里藏着很多隐蔽的咖啡馆，老虎窗外晾着衣服，里面却是精品手冲——这就是上海的"违和感美学"。' },
       ]);
     } finally {
       setIsLoading(false);
@@ -128,7 +123,6 @@ export function ChatInterface({
 
       const data = await res.json();
       if (data.content) {
-        // Try to parse JSON from response
         const jsonMatch = data.content.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           const itinerary = JSON.parse(jsonMatch[0]) as Itinerary;
@@ -137,7 +131,6 @@ export function ChatInterface({
       }
     } catch (e) {
       console.error('Generate error:', e);
-      // Fallback: use mock data
       onItineraryGenerated(getMockItinerary());
     } finally {
       setIsLoading(false);
@@ -149,22 +142,22 @@ export function ChatInterface({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen flex flex-col max-w-3xl mx-auto"
+      className="min-h-screen flex flex-col max-w-2xl mx-auto"
     >
       {/* Header */}
-      <div className="sticky top-0 z-20 glass-card-strong border-b border-white/60 px-4 sm:px-6 py-3 sm:py-4">
+      <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-lg border-b border-slate-100 px-5 sm:px-6 py-3.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-400 to-sky-400 flex items-center justify-center shadow-sm">
-              <span className="text-lg">🧭</span>
+            <div className="w-8 h-8 rounded-lg bg-slate-950 flex items-center justify-center">
+              <Compass className="w-4 h-4 text-white" strokeWidth={1.5} />
             </div>
             <div>
-              <h1 className="font-semibold text-navy-900 text-sm sm:text-base">Travel Copilot</h1>
-              <p className="text-[11px] sm:text-xs text-primary-500">你的松弛旅行搭子</p>
+              <h1 className="text-sm font-semibold text-slate-900">Travel Copilot</h1>
+              <p className="text-2xs text-slate-400">旅行规划助手</p>
             </div>
           </div>
           {preferences.personality && (
-            <span className="text-xs bg-gradient-to-r from-primary-50 to-sky-50 text-primary-700 px-3 py-1.5 rounded-full border border-primary-100/50 font-medium">
+            <span className="text-2xs bg-slate-50 text-slate-600 px-2.5 py-1 rounded-md border border-slate-100 font-medium">
               {preferences.personality}
             </span>
           )}
@@ -172,33 +165,30 @@ export function ChatInterface({
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4">
-        {/* Quick start examples - shown when only welcome message exists */}
+      <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 space-y-4">
+        {/* Quick start examples */}
         {chatHistory.length <= 1 && !isLoading && (
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="space-y-3"
+            transition={{ delay: 0.4 }}
+            className="space-y-2.5 mt-2"
           >
-            <p className="text-xs text-primary-500 font-medium text-center">👇 不知道说什么？试试点击下面的例子：</p>
+            <p className="text-xs text-slate-400 font-medium">试试这些：</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {[
-                { emoji: '🌸', text: '端午想去杭州玩两天，松弛一点的那种' },
-                { emoji: '🏙️', text: '周末上海citywalk，喜欢拍照和咖啡' },
-                { emoji: '🌊', text: '想找个海边小城发呆三天，预算2000以内' },
-                { emoji: '🎌', text: '第一次去日本，5天自由行求攻略' },
-              ].map((example, i) => (
-                <motion.button
+                '端午想去杭州玩两天，松弛一点的那种',
+                '周末上海citywalk，喜欢拍照和咖啡',
+                '想找个海边小城发呆三天，预算2000以内',
+                '第一次去日本，5天自由行求攻略',
+              ].map((text, i) => (
+                <button
                   key={i}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => sendMessage(example.text)}
-                  className="text-left p-3 rounded-xl bg-white/60 hover:bg-white/90 border border-primary-100/50 hover:border-primary-200 transition-all group"
+                  onClick={() => sendMessage(text)}
+                  className="text-left p-3 rounded-lg bg-white border border-slate-100 hover:border-slate-200 hover:shadow-subtle transition-all text-xs sm:text-sm text-slate-600 hover:text-slate-900"
                 >
-                  <span className="text-lg mr-2">{example.emoji}</span>
-                  <span className="text-xs sm:text-sm text-navy-800 group-hover:text-primary-700">{example.text}</span>
-                </motion.button>
+                  {text}
+                </button>
               ))}
             </div>
           </motion.div>
@@ -208,16 +198,16 @@ export function ChatInterface({
           {chatHistory.map((msg, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.25 }}
               className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[85%] sm:max-w-[75%] rounded-2xl px-4 py-3 ${
+                className={`max-w-[80%] sm:max-w-[72%] rounded-2xl px-4 py-3 ${
                   msg.role === 'user'
-                    ? 'bg-gradient-to-br from-primary-500 to-primary-600 text-white rounded-br-md shadow-md shadow-primary-200/30'
-                    : 'glass-card rounded-bl-md'
+                    ? 'bg-slate-900 text-white rounded-br-md'
+                    : 'bg-white border border-slate-100 shadow-xs rounded-bl-md'
                 }`}
               >
                 <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
@@ -227,16 +217,12 @@ export function ChatInterface({
         </AnimatePresence>
 
         {isLoading && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex justify-start"
-          >
-            <div className="glass-card rounded-2xl rounded-bl-md px-4 py-3">
-              <div className="flex gap-1.5">
-                <span className="w-2 h-2 bg-primary-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="w-2 h-2 bg-primary-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-2 h-2 bg-primary-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
+            <div className="bg-white border border-slate-100 rounded-2xl rounded-bl-md px-4 py-3">
+              <div className="flex gap-1">
+                <span className="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
               </div>
             </div>
           </motion.div>
@@ -252,7 +238,7 @@ export function ChatInterface({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="border-t border-primary-100/30 bg-gradient-to-b from-white/60 to-primary-50/30 backdrop-blur-md overflow-hidden"
+            className="border-t border-slate-100 bg-slate-25 overflow-hidden"
           >
             <PreferenceSliders
               weights={preferences.weights}
@@ -263,9 +249,9 @@ export function ChatInterface({
       </AnimatePresence>
 
       {/* Input area */}
-      <div className="sticky bottom-0 glass-card-strong border-t border-white/60 px-4 sm:px-6 py-3 sm:py-4">
-        <div className="flex gap-3 items-end">
-          <div className="flex-1 relative">
+      <div className="sticky bottom-0 bg-white border-t border-slate-100 px-5 sm:px-6 py-3.5">
+        <div className="flex gap-2.5 items-end">
+          <div className="flex-1">
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -275,48 +261,47 @@ export function ChatInterface({
                   sendMessage(input);
                 }
               }}
-              placeholder="告诉我你的旅行想法..."
+              placeholder="输入你的旅行想法..."
               rows={1}
-              className="w-full resize-none rounded-xl bg-white/80 border border-primary-100 focus:border-primary-300 focus:ring-2 focus:ring-primary-100 px-4 py-3 text-sm outline-none transition-all placeholder:text-gray-400"
+              className="w-full resize-none rounded-lg bg-slate-50 border border-slate-150 focus:border-slate-300 focus:bg-white px-3.5 py-2.5 text-sm outline-none transition-all placeholder:text-slate-400"
             />
           </div>
           <button
             onClick={() => sendMessage(input)}
             disabled={!input.trim() || isLoading}
-            className="bg-gradient-to-r from-primary-500 to-sky-500 hover:from-primary-600 hover:to-sky-600 disabled:from-gray-200 disabled:to-gray-300 disabled:cursor-not-allowed text-white p-3 rounded-xl transition-all shadow-sm"
+            className="bg-slate-900 hover:bg-slate-700 disabled:bg-slate-100 disabled:text-slate-300 disabled:cursor-not-allowed text-white p-2.5 rounded-lg transition-colors"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-            </svg>
+            <Send className="w-4 h-4" strokeWidth={2} />
           </button>
         </div>
 
         {/* Action buttons */}
-        <div className="flex gap-2 mt-3 flex-wrap">
+        <div className="flex gap-2 mt-2.5">
           <button
             onClick={() => setShowSliders(!showSliders)}
-            className="text-xs bg-white/70 hover:bg-white border border-primary-100/50 text-primary-700 px-3 py-1.5 rounded-lg transition-all font-medium"
+            className="text-2xs bg-slate-50 hover:bg-slate-100 border border-slate-100 text-slate-600 px-2.5 py-1.5 rounded-md transition-colors flex items-center gap-1.5 font-medium"
           >
-            🎚️ {showSliders ? '收起偏好' : '调整偏好'}
+            <SlidersHorizontal className="w-3 h-3" strokeWidth={2} />
+            {showSliders ? '收起' : '偏好'}
           </button>
           <button
             onClick={getInspiration}
             disabled={isLoading}
-            className="text-xs bg-white/70 hover:bg-white border border-amber-200/50 text-amber-700 px-3 py-1.5 rounded-lg transition-all font-medium disabled:opacity-50"
+            className="text-2xs bg-slate-50 hover:bg-slate-100 border border-slate-100 text-slate-600 px-2.5 py-1.5 rounded-md transition-colors flex items-center gap-1.5 font-medium disabled:opacity-50"
           >
-            💡 灵感发现
+            <Lightbulb className="w-3 h-3" strokeWidth={2} />
+            灵感
           </button>
           {messageCount >= 2 && (
             <motion.button
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
               onClick={generateItinerary}
               disabled={isLoading}
-              className="text-xs bg-gradient-to-r from-primary-500 to-sky-500 hover:from-primary-600 hover:to-sky-600 disabled:from-gray-200 disabled:to-gray-300 text-white px-4 py-1.5 rounded-lg transition-all font-medium shadow-sm"
+              className="text-2xs bg-slate-900 hover:bg-slate-700 disabled:bg-slate-100 disabled:text-slate-400 text-white px-3 py-1.5 rounded-md transition-colors flex items-center gap-1.5 font-medium"
             >
-              ✨ 生成行程方案
+              <Sparkles className="w-3 h-3" strokeWidth={2} />
+              生成行程
             </motion.button>
           )}
         </div>
@@ -341,7 +326,7 @@ function getMockItinerary(): Itinerary {
             crowdLevel: 'low',
             photoScore: 5,
             walkingMinutes: 45,
-            bestTime: '9:00-11:00（光线最佳）',
+            bestTime: '9:00-11:00',
             alternatives: ['复兴岛', '民生码头'],
             isLuckySpot: false,
             category: '拍照',
@@ -350,7 +335,7 @@ function getMockItinerary(): Itinerary {
             id: '2',
             name: '定海桥互助社区',
             description: '藏在老城区的社区艺术空间',
-            reason: '本地人才知道的文化据点，适合氛围感受者',
+            reason: '本地人才知道的文化据点',
             crowdLevel: 'low',
             photoScore: 3,
             walkingMinutes: 20,
@@ -367,14 +352,14 @@ function getMockItinerary(): Itinerary {
             crowdLevel: 'medium',
             photoScore: 4,
             walkingMinutes: 15,
-            bestTime: '11:30-13:00（午市最热闹）',
+            bestTime: '11:30-13:00',
             alternatives: ['蒙西菜场', '乌中市集'],
             isLuckySpot: false,
             category: '美食',
           },
           {
             id: '4',
-            name: '☕ Free Time Block',
+            name: 'Free Time Block',
             description: '找家咖啡馆歇一歇',
             reason: '上午步行约2小时，建议休息30-45分钟补充能量',
             crowdLevel: 'low',
@@ -387,22 +372,22 @@ function getMockItinerary(): Itinerary {
           },
           {
             id: '5',
-            name: '衡复风貌区支线（高安路-岳阳路）',
+            name: '衡复风貌区支线',
             description: '梧桐树下的法式老洋房漫步',
             reason: '避开武康路主干道，支线人流减少70%，出片率不减',
             crowdLevel: 'low',
             photoScore: 5,
             walkingMinutes: 60,
-            bestTime: '14:30-16:30（树荫遮阳）',
+            bestTime: '14:30-16:30',
             alternatives: ['愚园路', '新华路'],
             isLuckySpot: false,
             category: '拍照',
           },
           {
             id: '6',
-            name: '🎲 Lucky Spot',
-            description: '到达后揭晓的惊喜',
-            reason: '基于你的人格和今日路线特别推荐，到了就知道了 😉',
+            name: 'Lucky Spot',
+            description: '到达后揭晓的惊喜目的地',
+            reason: '基于你的人格和今日路线特别推荐',
             crowdLevel: 'low',
             photoScore: 4,
             walkingMinutes: 10,
@@ -424,7 +409,7 @@ function getMockItinerary(): Itinerary {
             crowdLevel: 'low',
             photoScore: 5,
             walkingMinutes: 40,
-            bestTime: '8:30-10:30（晨光最美）',
+            bestTime: '8:30-10:30',
             alternatives: ['辰山植物园', '共青森林公园'],
             isLuckySpot: false,
             category: '拍照',
@@ -444,7 +429,7 @@ function getMockItinerary(): Itinerary {
           },
           {
             id: '9',
-            name: '🌿 午后留白',
+            name: '午后留白',
             description: '不安排目的地的自由探索时间',
             reason: '这段时间属于你，可以就近逛逛或者找一家店发呆',
             crowdLevel: 'low',
@@ -476,7 +461,7 @@ function getMockItinerary(): Itinerary {
             crowdLevel: 'medium',
             photoScore: 3,
             walkingMinutes: 10,
-            bestTime: '17:30-19:00（黄金时段）',
+            bestTime: '17:30-19:00',
             alternatives: ['安福路小酒馆', '巨鹿路'],
             isLuckySpot: false,
             category: '美食',
