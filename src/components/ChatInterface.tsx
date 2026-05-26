@@ -145,19 +145,19 @@ export function ChatInterface({
       className="min-h-screen flex flex-col max-w-2xl mx-auto"
     >
       {/* Header */}
-      <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-lg border-b border-slate-100 px-5 sm:px-6 py-3.5">
+      <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-lg border-b border-blue-100/50 px-5 sm:px-6 py-3.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-slate-950 flex items-center justify-center">
-              <Compass className="w-4 h-4 text-white" strokeWidth={1.5} />
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-sm shadow-blue-200">
+              <Compass className="w-4 h-4 text-white" strokeWidth={1.8} />
             </div>
             <div>
-              <h1 className="text-sm font-semibold text-slate-900">Travel Copilot</h1>
-              <p className="text-2xs text-slate-400">旅行规划助手</p>
+              <h1 className="text-sm font-semibold text-slate-800">Travel Copilot</h1>
+              <p className="text-2xs text-blue-400">旅行规划助手</p>
             </div>
           </div>
           {preferences.personality && (
-            <span className="text-2xs bg-slate-50 text-slate-600 px-2.5 py-1 rounded-md border border-slate-100 font-medium">
+            <span className="text-2xs bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full border border-blue-100 font-medium">
               {preferences.personality}
             </span>
           )}
@@ -185,7 +185,7 @@ export function ChatInterface({
                 <button
                   key={i}
                   onClick={() => sendMessage(text)}
-                  className="text-left p-3 rounded-lg bg-white border border-slate-100 hover:border-slate-200 hover:shadow-subtle transition-all text-xs sm:text-sm text-slate-600 hover:text-slate-900"
+                  className="text-left p-3 rounded-xl bg-white/80 border border-blue-100/60 hover:border-blue-200 hover:shadow-sm transition-all text-xs sm:text-sm text-slate-600 hover:text-slate-800"
                 >
                   {text}
                 </button>
@@ -206,8 +206,8 @@ export function ChatInterface({
               <div
                 className={`max-w-[80%] sm:max-w-[72%] rounded-2xl px-4 py-3 ${
                   msg.role === 'user'
-                    ? 'bg-slate-900 text-white rounded-br-md'
-                    : 'bg-white border border-slate-100 shadow-xs rounded-bl-md'
+                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-md shadow-sm shadow-blue-200'
+                    : 'bg-white border border-blue-100/60 shadow-sm rounded-bl-md'
                 }`}
               >
                 <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
@@ -218,11 +218,11 @@ export function ChatInterface({
 
         {isLoading && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
-            <div className="bg-white border border-slate-100 rounded-2xl rounded-bl-md px-4 py-3">
+            <div className="bg-white border border-blue-100/60 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
               <div className="flex gap-1">
-                <span className="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                <span className="w-1.5 h-1.5 bg-blue-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-1.5 h-1.5 bg-blue-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-1.5 h-1.5 bg-blue-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
               </div>
             </div>
           </motion.div>
@@ -249,7 +249,7 @@ export function ChatInterface({
       </AnimatePresence>
 
       {/* Input area */}
-      <div className="sticky bottom-0 bg-white border-t border-slate-100 px-5 sm:px-6 py-3.5">
+      <div className="sticky bottom-0 bg-white/90 backdrop-blur-lg border-t border-blue-100/50 px-5 sm:px-6 py-3.5">
         <div className="flex gap-2.5 items-end">
           <div className="flex-1">
             <textarea
@@ -269,7 +269,7 @@ export function ChatInterface({
           <button
             onClick={() => sendMessage(input)}
             disabled={!input.trim() || isLoading}
-            className="bg-slate-900 hover:bg-slate-700 disabled:bg-slate-100 disabled:text-slate-300 disabled:cursor-not-allowed text-white p-2.5 rounded-lg transition-colors"
+            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:bg-slate-100 disabled:from-slate-100 disabled:to-slate-100 disabled:text-slate-300 disabled:cursor-not-allowed text-white p-2.5 rounded-xl transition-all shadow-sm shadow-blue-200 disabled:shadow-none"
           >
             <Send className="w-4 h-4" strokeWidth={2} />
           </button>
@@ -279,7 +279,7 @@ export function ChatInterface({
         <div className="flex gap-2 mt-2.5">
           <button
             onClick={() => setShowSliders(!showSliders)}
-            className="text-2xs bg-slate-50 hover:bg-slate-100 border border-slate-100 text-slate-600 px-2.5 py-1.5 rounded-md transition-colors flex items-center gap-1.5 font-medium"
+            className="text-2xs bg-blue-50 hover:bg-blue-100 border border-blue-100 text-blue-600 px-2.5 py-1.5 rounded-full transition-colors flex items-center gap-1.5 font-medium"
           >
             <SlidersHorizontal className="w-3 h-3" strokeWidth={2} />
             {showSliders ? '收起' : '偏好'}
@@ -287,7 +287,7 @@ export function ChatInterface({
           <button
             onClick={getInspiration}
             disabled={isLoading}
-            className="text-2xs bg-slate-50 hover:bg-slate-100 border border-slate-100 text-slate-600 px-2.5 py-1.5 rounded-md transition-colors flex items-center gap-1.5 font-medium disabled:opacity-50"
+            className="text-2xs bg-blue-50 hover:bg-blue-100 border border-blue-100 text-blue-600 px-2.5 py-1.5 rounded-full transition-colors flex items-center gap-1.5 font-medium disabled:opacity-50"
           >
             <Lightbulb className="w-3 h-3" strokeWidth={2} />
             灵感
@@ -298,7 +298,7 @@ export function ChatInterface({
               animate={{ opacity: 1, scale: 1 }}
               onClick={generateItinerary}
               disabled={isLoading}
-              className="text-2xs bg-slate-900 hover:bg-slate-700 disabled:bg-slate-100 disabled:text-slate-400 text-white px-3 py-1.5 rounded-md transition-colors flex items-center gap-1.5 font-medium"
+              className="text-2xs bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-slate-100 disabled:to-slate-100 disabled:text-slate-400 text-white px-3 py-1.5 rounded-full transition-all flex items-center gap-1.5 font-medium shadow-sm shadow-blue-200 disabled:shadow-none"
             >
               <Sparkles className="w-3 h-3" strokeWidth={2} />
               生成行程

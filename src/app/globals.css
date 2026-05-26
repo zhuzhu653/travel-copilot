@@ -5,12 +5,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --color-text: #0c1222;
+  --color-text: #1e293b;
   --color-text-secondary: #64748b;
-  --color-border: #e2e8f0;
+  --color-border: #e0effe;
   --color-surface: #ffffff;
-  --color-bg: #f8fafc;
-  --color-brand: #0c8ce9;
+  --color-bg: #eef6ff;
+  --color-brand: #4a9ff5;
+  --color-brand-dark: #2563eb;
 }
 
 * {
@@ -19,7 +20,7 @@
 
 body {
   color: var(--color-text);
-  background: var(--color-bg);
+  background: linear-gradient(135deg, #e8f4fd 0%, #f0f7ff 30%, #eef6ff 60%, #dbeafe 100%);
   min-height: 100vh;
   font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -55,21 +56,21 @@ input[type="range"] {
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: var(--color-brand);
   cursor: pointer;
-  box-shadow: 0 1px 4px rgba(12, 140, 233, 0.3);
+  box-shadow: 0 2px 6px rgba(74, 159, 245, 0.35);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 input[type="range"]::-webkit-slider-thumb:hover {
   transform: scale(1.15);
-  box-shadow: 0 2px 8px rgba(12, 140, 233, 0.4);
+  box-shadow: 0 3px 10px rgba(74, 159, 245, 0.45);
 }
 
 /* Selection */
 ::selection {
-  background: rgba(12, 140, 233, 0.12);
+  background: rgba(74, 159, 245, 0.15);
 }
 

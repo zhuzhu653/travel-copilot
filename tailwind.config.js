@@ -9,20 +9,20 @@ module.exports = {
     extend: {
       colors: {
         brand: {
-          50: '#f0f7ff',
-          100: '#e0effe',
-          200: '#b9dffd',
-          300: '#7cc5fc',
-          400: '#36a7f8',
-          500: '#0c8ce9',
-          600: '#006fc7',
-          800: '#064e8c',
+          50: '#eff8ff',
+          100: '#dbeffe',
+          200: '#bfe3fe',
+          300: '#93d2fd',
+          400: '#4a9ff5',
+          500: '#3b8ef0',
+          600: '#2563eb',
+          800: '#1e40af',
         },
         slate: {
           25: '#fcfcfd',
           50: '#f8fafc',
           75: '#f3f6f9',
-          950: '#0c1222',
+          950: '#1e293b',
         },
       },
       fontFamily: {

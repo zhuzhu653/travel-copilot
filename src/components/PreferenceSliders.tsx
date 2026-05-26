@@ -24,18 +24,25 @@ const sliderConfig = [
 export function PreferenceSliders({ weights, onChange }: PreferenceSlidersProps) {
   const total = Object.values(weights).reduce((a, b) => a + b, 0);
 
+  // 计算归一化百分比（自动将总和映射到100%）
+  const getNormalized = (key: keyof typeof weights) => {
+    if (total === 0) return 0;
+    return Math.round((weights[key] / total) * 100);
+  };
+
   return (
     <div className="px-5 sm:px-6 py-4">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">偏好权重</h3>
-        <span className="text-2xs text-slate-400 font-mono">
-          {total}%{total !== 100 && ' / 100%'}
+        <span className="text-2xs text-slate-400">
+          拖动滑块调整比重，自动归一化到 100%
         </span>
       </div>
 
       <div className="space-y-3">
         {sliderConfig.map((slider) => {
           const Icon = slider.icon;
+          const normalized = getNormalized(slider.key);
           return (
             <div key={slider.key} className="flex items-center gap-3">
               <div className="flex items-center gap-2 w-16 shrink-0">
@@ -53,11 +60,11 @@ export function PreferenceSliders({ weights, onChange }: PreferenceSlidersProps)
                 }
                 className="flex-1 cursor-pointer"
                 style={{
-                  background: `linear-gradient(to right, #0c8ce9 ${weights[slider.key]}%, #e2e8f0 ${weights[slider.key]}%)`,
+                  background: `linear-gradient(to right, #4a9ff5 ${weights[slider.key]}%, #e0effe ${weights[slider.key]}%)`,
                 }}
               />
-              <span className="text-2xs font-mono text-slate-500 w-7 text-right">
-                {weights[slider.key]}
+              <span className="text-2xs font-mono text-slate-500 w-8 text-right">
+                {normalized}%
               </span>
             </div>
           );
@@ -65,13 +72,13 @@ export function PreferenceSliders({ weights, onChange }: PreferenceSlidersProps)
       </div>
 
       {/* Distribution bar */}
-      <div className="mt-3 flex rounded-full overflow-hidden h-1 bg-slate-100">
+      <div className="mt-3 flex rounded-full overflow-hidden h-1.5 bg-slate-100">
         {sliderConfig.map((slider) =>
           weights[slider.key] > 0 ? (
             <div
               key={slider.key}
-              className="bg-slate-900 transition-all duration-300"
-              style={{ width: `${(weights[slider.key] / Math.max(total, 1)) * 100}%`, opacity: 0.2 + (weights[slider.key] / 100) * 0.8 }}
+              className="bg-blue-500 transition-all duration-300"
+              style={{ width: `${getNormalized(slider.key)}%`, opacity: 0.4 + (getNormalized(slider.key) / 100) * 0.6 }}
             />
           ) : null
         )}
