@@ -54,14 +54,16 @@ export function MapView({ spots, city = '上海', onSpotClick }: MapViewProps) {
 
         if (!mapRef.current || !window.AMap) return;
 
-        // Create map centered on city
+        // Create map
         const map = new window.AMap.Map(mapRef.current, {
           zoom: 12,
           viewMode: '2D',
           mapStyle: 'amap://styles/light',
-          city: city,
         });
         mapInstance.current = map;
+
+        // Center map on city first
+        map.setCity(city);
 
         // Use PlaceSearch to find spots and add markers
         const placeSearch = new window.AMap.PlaceSearch({
@@ -76,8 +78,10 @@ export function MapView({ spots, city = '上海', onSpotClick }: MapViewProps) {
         for (let i = 0; i < visibleSpots.length; i++) {
           const spot = visibleSpots[i];
           try {
+            // 简化搜索名：去掉中文括号、书名号、"·"后的修饰语
+            const searchName = spot.name.replace(/[（(].+?[）)]/g, '').replace(/·.+$/, '').trim() || spot.name;
             const result = await new Promise<any>((resolve) => {
-              placeSearch.search(spot.name, (status: string, result: any) => {
+              placeSearch.search(searchName, (status: string, result: any) => {
                 resolve({ status, result });
               });
             });
