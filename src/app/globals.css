@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+/* 字体由 next/font 自托管，不再使用 Google Fonts 外链 */
 
 :root {
   --color-text: #1e293b;
@@ -12,20 +12,34 @@
   --color-bg: #eef6ff;
   --color-brand: #4a9ff5;
   --color-brand-dark: #2563eb;
+  /* iOS safe area */
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
 }
 
 * {
   -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
 }
 
 body {
   color: var(--color-text);
   background: linear-gradient(135deg, #e8f4fd 0%, #f0f7ff 30%, #eef6ff 60%, #dbeafe 100%);
   min-height: 100vh;
-  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif;
+  min-height: 100dvh;
+  font-family: var(--font-inter), var(--font-noto-sc), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   letter-spacing: -0.011em;
+  /* 防止微信浏览器字体大小被系统设置覆盖 */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* iOS 安全区适配 */
+  padding-top: var(--safe-area-top);
+  padding-left: var(--safe-area-left);
+  padding-right: var(--safe-area-right);
 }
 
 /* Custom scrollbar - minimal */
@@ -72,5 +86,28 @@ input[type="range"]::-webkit-slider-thumb:hover {
 /* Selection */
 ::selection {
   background: rgba(74, 159, 245, 0.15);
+}
+
+/* 移动端输入框优化 - 防止 iOS/微信自动缩放 */
+input, textarea, select {
+  font-size: 16px !important;
+}
+
+/* 微信浏览器兼容 - 防止长按弹出菜单 */
+img {
+  -webkit-touch-callout: none;
+}
+
+/* 移动端滚动优化 */
+.overflow-y-auto,
+.overflow-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 修复 100vh 在移动端浏览器地址栏问题 */
+@supports (height: 100dvh) {
+  .min-h-screen {
+    min-height: 100dvh;
+  }
 }
 

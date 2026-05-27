@@ -294,7 +294,7 @@ export function ItineraryView({ itinerary, preferences, onBack, onVersionSwitch,
       </div>
 
       {/* Bottom version switcher (persistent) */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-blue-100/50 py-4 px-4 sm:px-6 z-10 shadow-[0_-4px_24px_rgba(0,0,0,0.02)]">
+      <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-blue-100/50 py-4 px-4 sm:px-6 pb-[max(1rem,env(safe-area-inset-bottom))] z-10 shadow-[0_-4px_24px_rgba(0,0,0,0.02)]">
         <div className="max-w-3xl mx-auto flex flex-wrap gap-2.5 justify-center relative">
           {isRegenerating && (
             <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10 rounded-xl">

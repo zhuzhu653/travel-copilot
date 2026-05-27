@@ -240,7 +240,7 @@ export function FloatingPet({ currentStage }: FloatingPetProps) {
   };
 
   return (
-    <div className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-50">
+    <div className="fixed bottom-20 sm:bottom-[max(1.5rem,calc(env(safe-area-inset-bottom)+0.5rem))] right-4 sm:right-6 z-50">
       {/* Tip bubble */}
       <AnimatePresence>
         {showBubble && !isOpen && !showPetSelector && (

@@ -47,7 +47,7 @@ export function MapView({ spots, city = '上海', onSpotClick }: MapViewProps) {
       return;
     }
 
-    // Load AMap script
+    // Load AMap script with timeout for WeChat browser compatibility
     const loadAMap = () => {
       return new Promise<void>((resolve, reject) => {
         if (window.AMap) {
@@ -55,11 +55,13 @@ export function MapView({ spots, city = '上海', onSpotClick }: MapViewProps) {
           return;
         }
 
+        const timeout = setTimeout(() => reject(new Error('地图加载超时')), 10000);
+
         const script = document.createElement('script');
         script.src = `https://webapi.amap.com/maps?v=2.0&key=${key}&plugin=AMap.Geocoder,AMap.PlaceSearch`;
         script.async = true;
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error('高德地图加载失败'));
+        script.onload = () => { clearTimeout(timeout); resolve(); };
+        script.onerror = () => { clearTimeout(timeout); reject(new Error('高德地图加载失败')); };
         document.head.appendChild(script);
       });
     };

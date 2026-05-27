@@ -310,7 +310,7 @@ export function ChatInterface({
       </AnimatePresence>
 
       {/* Input area */}
-      <div className="sticky bottom-0 bg-white/90 backdrop-blur-lg border-t border-blue-100/50 px-5 sm:px-6 py-3.5">
+      <div className="sticky bottom-0 bg-white/90 backdrop-blur-lg border-t border-blue-100/50 px-5 sm:px-6 py-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))]">
         <div className="flex gap-2.5 items-end">
           <div className="flex-1">
             <textarea
