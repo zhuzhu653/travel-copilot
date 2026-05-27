@@ -202,11 +202,10 @@ export function FloatingPet({ currentStage }: FloatingPetProps) {
   const [hasPetImage, setHasPetImage] = useState(false);
 
   useEffect(() => {
-    // Check if custom pet image exists
-    const img = new Image();
-    img.onload = () => setHasPetImage(true);
-    img.onerror = () => setHasPetImage(false);
-    img.src = '/pet.png';
+    // Check if custom pet image exists (use fetch to avoid console 404 noise)
+    fetch('/pet.png', { method: 'HEAD' })
+      .then(res => setHasPetImage(res.ok))
+      .catch(() => setHasPetImage(false));
   }, []);
 
   useEffect(() => {
