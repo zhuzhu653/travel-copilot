@@ -100,7 +100,6 @@ export default function Home() {
             const newItinerary = JSON.parse(jsonStr) as Itinerary;
             if (newItinerary.days?.length > 0) {
               newItinerary.version = version;
-              setItinerary(newItinerary);
               return newItinerary;
             }
           } catch {

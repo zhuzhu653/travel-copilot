@@ -112,10 +112,10 @@ export function ItineraryView({ itinerary, preferences, onBack, onVersionSwitch,
               返回对话
             </button>
             <span className="text-xs bg-slate-50 text-slate-600 px-3 py-1 rounded-lg border border-slate-100 font-medium">
-              {itinerary.version}
+              {currentItinerary.version}
             </span>
           </div>
-          <h1 className="text-lg sm:text-xl font-bold text-slate-800 tracking-tight">{itinerary.title}</h1>
+          <h1 className="text-lg sm:text-xl font-bold text-slate-800 tracking-tight">{currentItinerary.title}</h1>
           {/* Travel Card button */}
 
         </div>
