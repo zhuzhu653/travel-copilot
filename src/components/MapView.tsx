@@ -62,7 +62,7 @@ export function MapView({ spots, city = '上海', onSpotClick }: MapViewProps) {
         });
         mapInstance.current = map;
 
-        // Use Geocoder to center map on city
+        // Use Geocoder to center map on city and locate spots
         const geocoder = new window.AMap.Geocoder({ city: city });
         geocoder.getLocation(city, (status: string, result: any) => {
           if (status === 'complete' && result.geocodes?.length > 0) {
@@ -71,31 +71,25 @@ export function MapView({ spots, city = '上海', onSpotClick }: MapViewProps) {
           }
         });
 
-        // Use PlaceSearch to find spots and add markers
-        const placeSearch = new window.AMap.PlaceSearch({
-          city: city,
-          citylimit: true,
-          pageSize: 1,
-        });
-
         const visibleSpots = spots.filter((s) => !s.isLuckySpot && s.category !== '休息');
         const markers: any[] = [];
 
         for (let i = 0; i < visibleSpots.length; i++) {
           const spot = visibleSpots[i];
           try {
-            // 简化搜索名：去掉中文括号、书名号、"·"后的修饰语
+            // 简化搜索名并加上城市前缀，确保在正确城市搜索
             const searchName = spot.name.replace(/[（(].+?[）)]/g, '').replace(/·.+$/, '').trim() || spot.name;
+            const fullQuery = `${city}${searchName}`;
             const result = await new Promise<any>((resolve) => {
-              placeSearch.search(searchName, (status: string, result: any) => {
+              geocoder.getLocation(fullQuery, (status: string, result: any) => {
                 resolve({ status, result });
               });
             });
 
-            if (result.status === 'complete' && result.result.poiList?.pois?.length > 0) {
-              const poi = result.result.poiList.pois[0];
+            if (result.status === 'complete' && result.result.geocodes?.length > 0) {
+              const { lng, lat } = result.result.geocodes[0].location;
               const marker = new window.AMap.Marker({
-                position: poi.location,
+                position: [lng, lat],
                 title: spot.name,
                 label: {
                   content: `<div style="
