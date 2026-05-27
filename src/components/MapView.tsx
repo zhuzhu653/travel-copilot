@@ -54,17 +54,19 @@ export function MapView({ spots, city = '上海', onSpotClick }: MapViewProps) {
 
         if (!mapRef.current || !window.AMap) return;
 
-        // Create map
+        // Create map centered on city
         const map = new window.AMap.Map(mapRef.current, {
           zoom: 12,
           viewMode: '2D',
           mapStyle: 'amap://styles/light',
+          city: city,
         });
         mapInstance.current = map;
 
         // Use PlaceSearch to find spots and add markers
         const placeSearch = new window.AMap.PlaceSearch({
           city: city,
+          citylimit: true,
           pageSize: 1,
         });
 

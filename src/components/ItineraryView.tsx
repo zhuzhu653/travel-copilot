@@ -224,7 +224,7 @@ export function ItineraryView({ itinerary, preferences, onBack, onVersionSwitch,
       <div className="max-w-3xl mx-auto px-4 sm:px-6 mt-4">
         <MapView
           spots={currentItinerary.days[activeDay]?.spots || []}
-          city={currentItinerary.title.match(/上海|北京|杭州|成都|广州|深圳|南京|西安|重庆|武汉|长沙|厦门|苏州|青岛/)?.[0] || '上海'}
+          city={currentItinerary.title.match(/^(.+?)[·\-|—]/)?.[1]?.trim() || currentItinerary.title.match(/上海|北京|杭州|成都|广州|深圳|南京|西安|重庆|武汉|长沙|厦门|苏州|青岛|三亚|大理|丽江|拉萨|桂林|黄山|张家界|哈尔滨|昆明|贵阳|海口|珠海|东京|大阪|首尔|曼谷|新加坡|巴厘岛/)?.[0] || '上海'}
           onSpotClick={handleMapSpotClick}
         />
       </div>
