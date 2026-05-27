@@ -84,8 +84,7 @@ export async function POST(request: NextRequest) {
         : '';
       
       systemMessages = [
-        { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'system', content: `${GENERATE_PROMPT}\n\n${prefString}` },
+        { role: 'system', content: `你是 Travel Copilot，一个旅行规划助手。现在用户已经完成了需求沟通，请根据聊天记录中的信息直接生成行程。不要再追问，不要聊天，只输出JSON。\n\n${GENERATE_PROMPT}\n\n${prefString}` },
       ];
     }
 
