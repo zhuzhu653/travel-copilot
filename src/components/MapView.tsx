@@ -23,6 +23,22 @@ export function MapView({ spots, city = '上海', onSpotClick }: MapViewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // 常见城市坐标（经度, 纬度）
+  const CITY_COORDS: Record<string, [number, number]> = {
+    '上海': [121.4737, 31.2304], '北京': [116.4074, 39.9042],
+    '杭州': [120.1551, 30.2741], '成都': [104.0668, 30.5728],
+    '广州': [113.2644, 23.1291], '深圳': [114.0579, 22.5431],
+    '南京': [118.7969, 32.0603], '西安': [108.9402, 34.3416],
+    '重庆': [106.5516, 29.5630], '武汉': [114.3054, 30.5931],
+    '长沙': [112.9388, 28.2282], '厦门': [118.0894, 24.4798],
+    '苏州': [120.5853, 31.2989], '青岛': [120.3826, 36.0671],
+    '三亚': [109.5080, 18.2479], '大理': [100.2250, 25.5896],
+    '丽江': [100.2270, 26.8550], '桂林': [110.2900, 25.2742],
+    '昆明': [102.8329, 25.0389], '哈尔滨': [126.6424, 45.7567],
+    '东京': [139.6917, 35.6895], '大阪': [135.5022, 34.6937],
+    '京都': [135.7681, 35.0116],
+  };
+
   useEffect(() => {
     const key = process.env.NEXT_PUBLIC_AMAP_KEY;
     if (!key) {
@@ -54,22 +70,18 @@ export function MapView({ spots, city = '上海', onSpotClick }: MapViewProps) {
 
         if (!mapRef.current || !window.AMap) return;
 
-        // Create map
+        // Create map centered on city
+        const cityCenter = CITY_COORDS[city] || CITY_COORDS['上海'];
         const map = new window.AMap.Map(mapRef.current, {
-          zoom: 12,
+          zoom: 13,
+          center: cityCenter,
           viewMode: '2D',
           mapStyle: 'amap://styles/light',
         });
         mapInstance.current = map;
 
-        // Use Geocoder to center map on city and locate spots
+        // Use Geocoder to locate spots
         const geocoder = new window.AMap.Geocoder({ city: city });
-        geocoder.getLocation(city, (status: string, result: any) => {
-          if (status === 'complete' && result.geocodes?.length > 0) {
-            const { lng, lat } = result.geocodes[0].location;
-            map.setCenter([lng, lat]);
-          }
-        });
 
         const visibleSpots = spots.filter((s) => !s.isLuckySpot && s.category !== '休息');
         const markers: any[] = [];
