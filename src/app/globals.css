@@ -42,6 +42,23 @@ body {
   padding-right: var(--safe-area-right);
 }
 
+/*
+ * 关键修复：防止 framer-motion SSR 的 opacity:0 在 JS 未加载时导致白屏
+ * 原理：纯 CSS 延迟动画，2秒后强制显示内容
+ * - JS 正常加载时：framer-motion 在 ~200ms 内 hydrate 并设置 opacity:1
+ *   此时 animation 被 framer-motion 的 JS 样式覆盖（framer 用 style.cssText 直接设置）
+ * - JS 失败时（微信屏蔽域名等）：2秒后 CSS animation 强制让内容可见
+ */
+@keyframes ssr-fallback-show {
+  to {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+main [style*="opacity"] {
+  animation: ssr-fallback-show 0.5s 2s both !important;
+}
+
 /* Custom scrollbar - minimal */
 ::-webkit-scrollbar {
   width: 4px;

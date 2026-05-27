@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { WelcomeScreen } from '@/components/WelcomeScreen';
 import { PersonalityTest } from '@/components/PersonalityTest';
@@ -55,6 +55,11 @@ export default function Home() {
   const [itinerary, setItinerary] = useState<Itinerary | null>(null);
   const [chatHistory, setChatHistory] = useState<Array<{ role: string; content: string }>>([]);
   const [returnedFromItinerary, setReturnedFromItinerary] = useState(false);
+
+  // 标记 React 已成功 hydrate，阻止内联脚本的强制显示逻辑
+  useEffect(() => {
+    (window as unknown as Record<string, unknown>).__NEXT_HYDRATED__ = true;
+  }, []);
 
   const handleVersionSwitch = async (version: string): Promise<Itinerary | null> => {
     // 真正重新生成不同版本的行程

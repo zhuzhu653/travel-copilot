@@ -1,17 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
+export async function onRequestPost(context) {
+  try {
+    const { messages, action, preferences } = await context.request.json();
 
-export const dynamic = 'force-dynamic';
-export const maxDuration = 60;
+    if (!messages || !Array.isArray(messages)) {
+      return new Response(JSON.stringify({ error: 'Invalid messages' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
 
-function getClient() {
-  return new OpenAI({
-    apiKey: process.env.DEEPSEEK_API_KEY || '',
-    baseURL: process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com',
-  });
-}
-
-const SYSTEM_PROMPT = `你是 Travel Copilot，一个松弛型旅行搭子。你的人格特点：
+    const SYSTEM_PROMPT = `你是 Travel Copilot，一个松弛型旅行搭子。你的人格特点：
 - 不说教，不催促，像一个去过很多地方的朋友
 - 随性聊天中帮用户理清想法
 - 偶尔抛出有趣的冷知识和本地故事
@@ -33,7 +31,7 @@ const SYSTEM_PROMPT = `你是 Travel Copilot，一个松弛型旅行搭子。你
 - 如果用户已经表达清楚了，不要反复追问
 - 回答中可以穿插1-2句当地冷知识或小贴士`;
 
-const GENERATE_PROMPT = `现在请根据用户的需求和偏好生成旅行行程。请严格按照以下JSON格式输出，不要输出其他内容：
+    const GENERATE_PROMPT = `现在请根据用户的需求和偏好生成旅行行程。请严格按照以下JSON格式输出，不要输出其他内容：
 
 {
   "title": "行程标题",
@@ -62,46 +60,57 @@ const GENERATE_PROMPT = `现在请根据用户的需求和偏好生成旅行行�
 
 要求：
 - 每天安排4-6个地点（含1个休息点、1个用餐点）
-- 必须包含1个 Lucky Spot（isLuckySpot: true），描述写该地点的真实亮点，不要写“到达后揭晓”
+- 必须包含1个 Lucky Spot（isLuckySpot: true），描述写该地点的真实亮点，不要写"到达后揭晓"
 - 避开节假日高人流热门景点
 - 路线要连续合理，不要来回折返
 - 根据用户偏好权重调整推荐（人少权重高则优先小众地点等）`;
 
-export async function POST(request: NextRequest) {
-  try {
-    const { messages, action, preferences } = await request.json();
-
-    if (!messages || !Array.isArray(messages)) {
-      return NextResponse.json({ error: 'Invalid messages' }, { status: 400 });
-    }
-
-    let systemMessages: OpenAI.ChatCompletionMessageParam[] = [
-      { role: 'system', content: SYSTEM_PROMPT },
-    ];
+    let systemMessages = [{ role: 'system', content: SYSTEM_PROMPT }];
 
     if (action === 'generate') {
       const prefString = preferences
         ? `用户偏好权重：人少不挤${preferences.crowd || 0}%、出片好看${preferences.photo || 0}%、本地美食${preferences.food || 0}%、行程轻松${preferences.relax || 0}%、预算友好${preferences.budget || 0}%、文化历史${preferences.culture || 0}%、自然风光${preferences.nature || 0}%`
         : '';
-      
       systemMessages = [
         { role: 'system', content: `你是 Travel Copilot，一个旅行规划助手。现在用户已经完成了需求沟通，请根据聊天记录中的信息直接生成行程。不要再追问，不要聊天，只输出JSON。\n\n${GENERATE_PROMPT}\n\n${prefString}` },
       ];
     }
 
-    const completion = await getClient().chat.completions.create({
-      model: 'deepseek-chat',
-      messages: [...systemMessages, ...messages],
-      temperature: action === 'generate' ? 0.3 : 0.8,
-      max_tokens: action === 'generate' ? 8000 : 500,
+    const apiKey = context.env.DEEPSEEK_API_KEY || '';
+    const baseURL = context.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com';
+
+    const response = await fetch(`${baseURL}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [...systemMessages, ...messages],
+        temperature: action === 'generate' ? 0.3 : 0.8,
+        max_tokens: action === 'generate' ? 8000 : 500,
+      }),
     });
 
-    const content = completion.choices[0]?.message?.content || '';
+    if (!response.ok) {
+      const err = await response.text();
+      return new Response(JSON.stringify({ error: `API error: ${response.status}` }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
 
-    return NextResponse.json({ content });
-  } catch (error: unknown) {
-    console.error('API Error:', error);
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json({ error: message }, { status: 500 });
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content || '';
+
+    return new Response(JSON.stringify({ content }), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: error.message || 'Unknown error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }
