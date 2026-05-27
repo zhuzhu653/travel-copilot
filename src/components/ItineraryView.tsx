@@ -605,10 +605,11 @@ function getCategoryIcon(category: string) {
   }
 }
 
-// 根据地点名和类别生成配图URL
+// 根据地点名生成配图URL（使用 picsum 基于 seed 的稳定图片）
 function getSpotImageUrl(spot: SpotCard): string {
-  const query = encodeURIComponent(`${spot.name} ${spot.category} china travel`);
-  return `https://source.unsplash.com/400x250/?${query}`;
+  // 用地点名作为 seed，确保同一地点每次显示相同图片
+  const seed = encodeURIComponent(spot.name);
+  return `https://picsum.photos/seed/${seed}/400/250`;
 }
 
 // 根据类别使用配色渐变作为图片fallback
