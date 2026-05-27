@@ -62,8 +62,14 @@ export function MapView({ spots, city = '上海', onSpotClick }: MapViewProps) {
         });
         mapInstance.current = map;
 
-        // Center map on city first
-        map.setCity(city);
+        // Use Geocoder to center map on city
+        const geocoder = new window.AMap.Geocoder({ city: city });
+        geocoder.getLocation(city, (status: string, result: any) => {
+          if (status === 'complete' && result.geocodes?.length > 0) {
+            const { lng, lat } = result.geocodes[0].location;
+            map.setCenter([lng, lat]);
+          }
+        });
 
         // Use PlaceSearch to find spots and add markers
         const placeSearch = new window.AMap.PlaceSearch({
