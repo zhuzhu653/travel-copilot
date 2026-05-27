@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
       model: 'deepseek-chat',
       messages: [...systemMessages, ...messages],
       temperature: action === 'generate' ? 0.3 : 0.8,
-      max_tokens: action === 'generate' ? 3000 : 500,
+      max_tokens: action === 'generate' ? 8000 : 500,
     });
 
     const content = completion.choices[0]?.message?.content || '';
