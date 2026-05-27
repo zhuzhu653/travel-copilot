@@ -77,7 +77,7 @@ export default function Home() {
         body: JSON.stringify({
           messages: [
             ...chatHistory.map((m) => ({ role: m.role, content: m.content })),
-            { role: 'user', content: extraInstruction },
+            { role: 'user', content: `[GENERATE_ITINERARY] ${extraInstruction} 请严格按JSON格式输出完整行程，不要输出任何解释文字。` },
           ],
           action: 'generate',
           preferences: preferences.weights,
